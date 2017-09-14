@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="4f2dc471-3c95-4a29-b79b-db99c47975a8" name="kianiss" url="http://localhost/kianfest">
+        <fileTransfer port="0" mountedRoot="C:\xampp\htdocs\kianfest" accessType="MOUNT" />
+      </webServer>
+    </option>
+  </component>
+</project>
