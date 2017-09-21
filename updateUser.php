@@ -6,11 +6,10 @@ const CHEQUE_SCORE = 0;
 include("include/db.php");
 function return_null_if_empty($user_data)
 {
-    return ($user_data == "")? "NULL" : $user_data;
-//    if ($user_data == "") {
-//        $user_data = "NULL";
-//    }
-//    return $user_data;
+    if ($user_data == "") {
+        $user_data = "NULL";
+    }
+    return $user_data;
 }
 
 function return_zero_if_empty($user_data)
@@ -31,39 +30,6 @@ function check_duplicate($db, $column_name, $column_value)
     if ($count > CHEQUE_SCORE)
         $return = true;
     return $return;
-}
-
-function send_sms($name, $last_name, $password, $phone)
-{
-    require 'sms_helper.php';
-
-    try {
-        date_default_timezone_set("Asia/Tehran");
-
-        // your sms.ir panel configuration
-        $APIKey = "685fd62b729f33e226e7a7a2";
-        $SecretKey = "smjmn";
-        $LineNumber = "10000038700241";
-
-        // your mobile numbers
-        $MobileNumbers = array($phone);
-
-        $sms_content = "کاربر گرامی $name $last_name ، حساب کاربری شما با نام کاربری: '$phone' و رمز عبور: '$password' ایجاد شد.";
-
-//        $sms_content = "کاربر گرامی " . $name . ' ، حساب کاربری شما با نام کاربری: "' . $phone . '" و رمز عبور: "' . $password . '" ایجاد شد';
-        // your text messages
-        $Messages = array($sms_content);
-
-        // sending date
-        @$SendDateTime = date("Y-m-d") . "T" . date("H:i:s");
-
-        $SmsIR_SendMessage = new SmsIR_SendMessage($APIKey, $SecretKey, $LineNumber);
-        $SendMessage = $SmsIR_SendMessage->SendMessage($MobileNumbers, $Messages, $SendDateTime);
-//        var_dump($SendMessage);
-
-    } catch (Exeption $e) {
-        echo 'Error SendMessage : ' . $e->getMessage();
-    }
 }
 
 /**
@@ -138,43 +104,60 @@ function cacl_cash_score($buy_cash)
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $id = $_POST['id'];
     $name = mysqli_real_escape_string($db, $_POST['name']);
     $last_name = mysqli_real_escape_string($db, $_POST['last_name']);
-    $password = mysqli_real_escape_string($db, $_POST['password']);
+//    $password = mysqli_real_escape_string($db, $_POST['password']);
     $referred = return_null_if_empty(mysqli_real_escape_string($db, $_POST['referred']));
     $score = return_null_if_empty(mysqli_real_escape_string($db, $_POST['kian_fest_score']));
     $phone = mysqli_real_escape_string($db, $_POST['phone']);
-    if (check_duplicate($db, 'phone', $phone)) {
-        $message = "شماره تلفن تکراریست";
-        echo $message;
-        return;
-    }
+//    if (check_duplicate($db, 'phone', $phone)) {
+//        $message = "شماره تلفن تکراریست";
+//        echo $message;
+//        return;
+//    }
     $gender = mysqli_real_escape_string($db, $_POST['gender']);
+
+    $selectedBuy = mysqli_real_escape_string($db, $_POST['selectedBuy'])-1;
     $birth_date = return_null_if_empty(mysqli_real_escape_string($db, $_POST['birth_date']));
     $buy_cash = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_cash']));
     $buy_2month = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_2month']));
     $buy_cheque = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_cheque']));
-//    $_2month_passed = isset($_POST['2month_passed']) ? 't' : 'f';
-//    $cheque_passed = isset($_POST['cheque_passed']) ? 't' : 'f';
-    $_2month_passed = 'f';
-    $cheque_passed = 'f';
+    $_2month_passed = isset($_POST['2month_passed']) ? 't' : 'f';
+    $cheque_passed = isset($_POST['cheque_passed']) ? 't' : 'f';
 
     $score = calc_score($buy_cash, $buy_2month, $buy_cheque, $referred, $db);
-    $sql = "INSERT INTO users (`name`, `last_name`, `password`, `referred`, `score`, `phone`, `gender`,
-            `birth_date`, `created_at`,buy_cash,buy_2month,buy_cheque,2month_passed,cheque_passed)
-            VALUES ('$name','$last_name','$password',  '$referred', $score, '$phone',$gender, 
-            '$birth_date', NOW(),'$buy_cash','$buy_2month','$buy_cheque','$_2month_passed','$cheque_passed')";
+
+    $select = "SELECT buy_cash, buy_2month, buy_cheque,2month_passed,cheque_passed FROM users WHERE id = $id";
+    $result = mysqli_query($db, $select);
+    foreach ($result as $key => $value) {
+        $buy_cash   = update_inside_string($value['buy_cash'],$selectedBuy,$buy_cash);
+        $buy_2month = update_inside_string($value['buy_2month'],$selectedBuy,$buy_2month);
+        $buy_cheque = update_inside_string($value['buy_cheque'],$selectedBuy,$buy_cheque);
+        $_2month_passed = update_inside_string($value['2month_passed'],$selectedBuy,$_2month_passed);
+        $cheque_passed  = update_inside_string($value['cheque_passed'],$selectedBuy,$cheque_passed);
+
+    }
+
+
+
+    $sql = "UPDATE users SET `name`='$name' , `last_name`= '$last_name', `referred` = '$referred', `score` = $score, `phone` = '$phone', `gender`=$gender,
+            `birth_date`='$birth_date',buy_cash = '$buy_cash',buy_2month = '$buy_2month',buy_cheque = '$buy_cheque',2month_passed='$_2month_passed',cheque_passed = '$cheque_passed' WHERE id = $id";
 
     if ($db->query($sql) === TRUE) {
-        $message = $last_name . " با موفقیت اضافه شد.";
-        send_sms($name, $last_name, $password, $phone);
+        $message = $last_name . " با موفقیت تغییر یافت.";
     } else {
         $message = "Error: " . $sql . "<br>" . $db->error;
     }
 
-
     echo $message;
+}
 
+
+function update_inside_string($str,$index,$newVal){
+    $array = explode(",", $str);
+    $array[$index] = $newVal;
+    return implode($array,',');
 }
 
 ?>

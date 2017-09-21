@@ -3,6 +3,7 @@ a {
   text-decoration: none;
   color: #fff;
   transition: all 0.3s;
+  cursor: pointer;
 }
 
 ul {
@@ -43,13 +44,6 @@ i[class*='icon-'] {
 h2 {
   color: #555;
   font-weight: 400;
-}
-
-@media (max-width: 576px) {
-  .gmpc {
-    border-right: none;
-    border-bottom: 1px solid #eee;
-  }
 }
 
 .display {
@@ -129,7 +123,7 @@ input.form-control-custom + label::before {
 input.form-control-custom + label::after {
   content: '\f00c';
   display: block;
-  font-family: 'FontAwesome';
+  font-family: "Roboto", XeroSans;
   font-size: 8px;
   color: #fff;
   position: absolute;
@@ -176,21 +170,21 @@ section.forms input.form-control::-moz-placeholder {
   font-size: 0.75em;
   font-weight: 300;
   color: #aaa;
-  font-family: "Roboto", sans-serif;
+  font-family: "Roboto", XeroSans;
 }
 
 section.forms input.form-control::-webkit-input-placeholder {
   font-size: 0.75em;
   font-weight: 300;
   color: #aaa;
-  font-family: "Roboto", sans-serif;
+  font-family: "Roboto", XeroSans;
 }
 
 section.forms input.form-control:-ms-input-placeholder {
   font-size: 0.75em;
   font-weight: 300;
   color: #aaa;
-  font-family: "Roboto", sans-serif;
+  font-family: "Roboto", XeroSans;
 }
 
 section.forms .select {
@@ -205,7 +199,7 @@ section.forms select {
   border-radius: 0;
   border-color: #ddd;
   font-weight: 300;
-  font-family: "Roboto", sans-serif;
+  font-family: "Roboto", XeroSans;
 }
 
 section.forms select option {
@@ -316,7 +310,7 @@ section.forms .input-group-btn .dropdown-menu a {
   border-radius: 0.25rem;
   transition: all 0.2s ease-in-out;
   margin: 5px;
-  width: 80px;
+  width: 111px;
 }
 
 .btn:focus, .btn.focus {
@@ -363,19 +357,19 @@ fieldset[disabled] a.btn {
 }
 
 .btn-secondary {
-  background-color: #EFE7FF;
-  color: #666;
-  border-color: #adadad;
+  color: #fff;
+  background-color: #601965;
+  border-color: #601965;
 }
 
 .btn-secondary:hover {
-  color: #292b2c;
-  background-color: #e6e6e6;
-  border-color: #adadad;
+  color: #fff;
+  background-color: #481a6e;
+  border-color: #481a6e;
 }
 
 .btn-secondary:focus, .btn-secondary.focus {
-  box-shadow: 0 0 0 2px rgba(204, 204, 204, 0.5);
+  box-shadow: 0 0 0 2px rgba(106, 27, 154, 0.5);
 }
 
 .btn-secondary.disabled, .btn-secondary:disabled {
@@ -697,7 +691,7 @@ fieldset[disabled] a.btn {
  * 3. TYPE
  */
 body {
-  font-family: "Roboto", sans-serif;
+  font-family:  "Roboto", XeroSans;
   font-size: 1rem;
   font-weight: normal;
   line-height: 1.5;
@@ -718,7 +712,7 @@ a:focus, a:hover {
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
   margin-bottom: 0.5rem;
-  font-family: "Roboto", sans-serif;
+  font-family: "Roboto", XeroSans;
   font-weight: 500;
   line-height: 1.1;
   color: inherit;
@@ -726,10 +720,12 @@ h1, h2, h3, h4, h5, h6,
 
 h1, .h1 {
   font-size: 1.5rem;
+  color: #3F1645;
 }
 
 h2, .h2 {
   font-size: 1.3rem;
+  color: #601965;
 }
 
 h3, .h3 {
@@ -884,13 +880,21 @@ a.text-primary:focus, a.text-primary:hover {
 
 
 /*************************************************/
-.login-page {
+.login-page , .index-page{
   background: #f5f5f5;
   /*min-height: auto;*/
   padding-bottom: 0;
 }
 
-.login-page .form-outer {
+.login-page .form-outer{
+  min-height: 100vh;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px 0;
+  position: relative;
+}
+
+.index-page .form-outer{
   min-height: 100vh;
   max-width: 1200px;
   margin: 0 auto;
@@ -898,27 +902,14 @@ a.text-primary:focus, a.text-primary:hover {
   position: relative;
 }
 
-.login-page .copyrights {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-}
-
-.login-page .copyrights p {
-  font-size: 0.6em;
-  font-weight: 300;
-  margin-bottom: 10px;
-}
-
-.login-page .form-inner {
+.login-page .form-inner, .index-page .form-inner {
   padding: 40px 30px;
   background: #fff;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
 
-.login-page .logo {
+.login-page .logo, .index-page .logo {
   font-size: 2em;
   font-weight: 500;
 }
@@ -927,20 +918,26 @@ a.text-primary:focus, a.text-primary:hover {
   color: #ccc;
 }
 
-.login-page p {
+.index-page .logo span {
+  color: #3F1645;
+}
+
+.login-page p,.index-page p {
   font-size: 0.8em;
   font-weight: 300;
   color: #aaa;
   margin-bottom: 0;
 }
 
-.login-page form {
+.login-page form, .index-page form {
   margin: 0 auto 10px;
   max-width: 300px;
 }
 
-.login-page form .form-group {
+.login-page form .form-group,
+.index-page form .form-group{
   position: relative;
+  display: flex;
 }
 
 .login-page form input {
@@ -957,12 +954,28 @@ a.text-primary:focus, a.text-primary:hover {
   margin-top: 20px;
   font-size: 0.9em;
 }
+.index-page .form-group input {
+  outline: none;
+  border-radius: 0;
+  /*width: 100%;*/
+  margin-right: 10px;
+  padding: 6px 10px;
+  color: #333;
+  font-weight: 300;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.9em;
+}
 
-.login-page form input[type='text'], .login-page form input[type='password'], .login-page form input[type='email']{
+.login-page form input[type='text'], .login-page form input[type='password'], .login-page form input[type='email'],
+.index-page form input[type='text'], .index-page form input[type='password'], .index-page form input[type='email']{
   background: none;
 }
 
-.login-page form input[type='submit']{
+.login-page form input[type='submit'],
+.index-page form input[type='submit']{
   width: 200px;
   border-radius: 50px;
   text-transform: uppercase;
@@ -973,51 +986,48 @@ a.text-primary:focus, a.text-primary:hover {
   color: #fff;
 }
 
-.login-page form label.error{
+.login-page form label.error,
+.index-page form label.error{
   font-size: 0.7em;
   color: #d9534f;
   margin-bottom: 0;
 }
 
-.login-page form label.label-custom{
+.login-page form label.label-custom,
+.index-page form label.label-custom{
   font-size: 0.8em;
   font-weight: normal;
   color: #aaa;
   position: absolute;
   top: 30px;
-  right: 0;
+  right: 10px;
+  width: 100%;
+  cursor: text;
+  transition: all 0.4s;
+  color: #666;
+}
+.index-page form label.label-custom-passed{
+  font-size: 0.8em;
+  font-weight: normal;
+  color: #aaa;
+  position: absolute;
+  top: 30px;
+  right: 135px;
   width: 100%;
   cursor: text;
   transition: all 0.4s;
   color: #666;
 }
 
-.login-page form label.label-custom.active{
+
+.login-page form label.label-custom.active,
+.index-page form label.label-custom.active{
   top: 5px;
   color: #601965;
 }
 
-.login-page a.forgot-pass,
-.login-page a.signup {
-  font-size: 0.65em;
-  color: #43a7fd;
-}
-
-.login-page a.forgot-pass:hover, .login-page a.forgot-pass:focus{
-  color: #43a7fd;
-  text-decoration: none;
-}
-
-.login-page a.forgot-pass {
-  display: block;
-}
-
-
-.login-page .terms-conditions {
-  margin-top: 20px;
-}
-
-.login-page small {
+.login-page small,
+.index-page small{
   font-size: 0.65em;
   color: #aaa;
   line-height: 0.9em;
@@ -1034,27 +1044,29 @@ a.text-primary:focus, a.text-primary:hover {
   .login-page form small {
     font-size: 0.8em;
   }
-  .login-page .terms-conditions label {
-    font-size: 0.9em;
-  }
-  .login-page a.forgot-pass,
-  .login-page a.signup {
-    font-size: 0.8em;
-  }
   .login-page small {
     font-size: 0.8em;
   }
-  .login-page .copyrights p {
-    font-size: 0.85em;
-    font-weight: 400;
+
+  .index-page p {
+    font-size: 0.9em;
+  }
+  .index-page form label.label-custom {
+    font-size: 0.9em;
+  }
+  .index-page form small {
+    font-size: 0.8em;
+  }
+  .index-page small {
+    font-size: 0.8em;
   }
 }
 /***********************************/
 a {
-  display: inline-block;
-  text-decoration: none;
-  color: #fff;
-  transition: all 0.3s;
+  /*display: inline-block;*/
+  /*text-decoration: none;*/
+  /*color: #fff;*/
+  /*transition: all 0.3s;*/
 }
 
 ul {
@@ -1095,17 +1107,13 @@ i[class*='icon-'] {
 .login-page {
   width: 100%;
 }
-
-h2 {
-  color: #555;
-  font-weight: 400;
+.index-page {
+  width: 100%;
 }
 
-@media (max-width: 576px) {
-  .gmpc {
-    border-right: none;
-    border-bottom: 1px solid #eee;
-  }
+h2 {
+  /*color: #555;*/
+  font-weight: 400;
 }
 
 .display {
@@ -1185,7 +1193,7 @@ input.form-control-custom + label::before {
 input.form-control-custom + label::after {
   content: '\f00c';
   display: block;
-  font-family: 'FontAwesome';
+  font-family: "Roboto", XeroSans;
   font-size: 8px;
   color: #fff;
   position: absolute;
@@ -1215,7 +1223,7 @@ button {
 }
 /********my style*******************/
 .new-user, .refered{
-  border-bottom: 1px solid #ccc;
+  /*border-bottom: 1px solid #ccc;*/
 }
 
 h2 a{ color: #601965;}
@@ -1226,21 +1234,29 @@ h2 a{ color: #601965;}
 
 .panel{
   display: none;
+  border-bottom: 1px solid #ccc;
 }
 
 .new-user-cols{
+  /*max-width: 900px;*/
   display: flex;
   justify-content: space-between;
 }
 .right-side{
-  width: 30%;
+  width: 15%;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 10px;
 }
 .center-side{
-  width: 25%;
+  width: 20%;
   margin-top: 32px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 10px;
 }
 .left-side{
-  width: 30%;
+  width: 45%;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 10px;
 }
 
 .header{
@@ -1255,7 +1271,7 @@ h2 a{ color: #601965;}
 }
 
 #user-form{
-  max-width: 900px;
+  max-width: 1140px;
 }
 
 .btns{

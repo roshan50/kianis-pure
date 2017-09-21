@@ -1,46 +1,17 @@
-<?php
-
-   include("include/db.php");
-   session_start();
-   if($_SERVER["REQUEST_METHOD"] == "POST") {
-      // username and password sent from form
-
-      $myusername = mysqli_real_escape_string($db,$_POST['username']);
-      $mypassword = mysqli_real_escape_string($db,$_POST['password']);
-
-      $sql = "SELECT id FROM users WHERE username = '$myusername' and password = '$mypassword'";
-      $result = mysqli_query($db,$sql);
-      $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
-
-      $count = mysqli_num_rows($result);
-      // If result matched $myusername and $mypassword, table row must be 1 row
-
-      if($count == 1) {
-         $_SESSION['myusername']= "myusername";
-         $_SESSION['login_user'] = $myusername;
-
-//         echo 'true';
-         header("location: index.php");
-      }else {
-         $error = "Your Login Name or Password is invalid";
-      }
-   }
-?>
-
 <html>
 <head>
   <link rel="stylesheet" href="css\style.css">
-<!--  <link rel="stylesheet" href="css\login.css">-->
   <meta charset="utf-8"/>
 </head>
 
 <body lang="fa" dir="rtl">
-  <div class="page login-page">
+  <div class="login-page">
     <div class="container">
       <div class="form-outer text-center d-flex align-items-center">
         <div class="form-inner">
           <div class="logo text-uppercase"><span>ورود به دشبورد</span><strong class="text-primary">کیانیس</strong></div>
-          <form id="login-form" method="post"  action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+          <div id="loading"><img src="images/loading.gif" /></div>
+          <form id="login-form">
             <div class="form-group">
               <label for="login-username" class="label-custom">نام کاربری</label>
               <input id="login-username" type="text" name="username" required="">
@@ -49,6 +20,7 @@
               <label for="login-password" class="label-custom">رمز عبور</label>
               <input id="login-password" type="password" name="password" required="">
             </div>
+             <div id="message"></div>
             <button class = "btn btn-lg btn-primary btn-block" type = "submit"
                name = "login">ورود</button>
           </form>
@@ -79,5 +51,41 @@ $(document).ready(function() {
             $(this).siblings('.label-custom').removeClass('active');
         }
     });
+
+
+    $('#login-form').submit(function(event) {
+        $.ajax({
+            type: 'post',
+            url: 'adminLogin.php',
+            data: $('#login-form').serialize(),
+            beforeSend: function() {
+                $("#loading").css("display","block");
+            },
+            success: function (data) {
+                document.getElementById("message").innerHTML = data;
+                if(data == 'true') location.href = "index.php";
+                $("#loading").css("display","none");
+            }
+        });
+        // stop the form from submitting the normal way and refreshing the page
+        event.preventDefault();
+    });
 });
 </script>
+
+<style>
+    #loading{
+        display: none;
+        z-index: 99;
+        position: absolute;
+        margin-right: 122px;
+        opacity: 0.8;
+        top: 75px;
+    }
+
+    #message{
+        color: red;
+        margin-top: 5px;
+    }
+
+</style>

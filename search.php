@@ -1,16 +1,22 @@
 <?php
 include "include/db.php";
-function search_where($username_search,$name_search,$phone_search){
+function search_where($last_name_search,$name_search,$phone_search){
     $where = '';
-    if($username_search) $where = "username LIKE '%$username_search%'";
-    if($name_search){ if($where) $and = "AND"; else $and = ""; $where.=" $and name LIKE '%$name_search%'";}
-    if($phone_search){ if($where) $and = "AND";else $and = ""; $where.=" $and phone LIKE '%$phone_search%'";}
-    if($where) $where = "WHERE $where";
+//    if($last_name_search) { $and = ($where) ? "AND" : ""; $where.=" $and last_name LIKE '%$last_name_search%'";}
+//    if($name_search){ $and = ($where) ? "AND" : ""; $where.=" $and name LIKE '%$name_search%'";}
+//    if($phone_search){ $and = ($where) ? "AND" : ""; $where.=" $and phone LIKE '%$phone_search%'";}
+//    if($where) $where = "WHERE $where";
+
+    if($last_name_search) {  $where.=" AND last_name LIKE '$last_name_search%'";}
+    if($name_search){ $where.=" AND name LIKE '$name_search%'";}
+    if($phone_search){ $where.=" AND phone LIKE '$phone_search%'";}
+
+
     return $where;
 }
 
 
-$row_per_page = 5;
+$row_per_page = 10;
 if(isset($_POST['page'])){
     $page = $_POST['page'];
     $offset = ($page-1) * $row_per_page;
@@ -19,18 +25,18 @@ if(isset($_POST['page'])){
     $page = 1;
 }
 //echo $page;
-$where = search_where($_POST['username_search'],$_POST['name_search'],$_POST['phone_search']);
+$where = search_where($_POST['last_name_search'],$_POST['name_search'],$_POST['phone_search']);
 if(isset($_POST['sort_col'])){
     $sort_col = $_POST['sort_col'];
 }else{
     $sort_col = 'created_at DESC';
 }
 
-$Query = "SELECT * FROM users $where ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset";
+$Query = "SELECT * FROM users WHERE deleted_at IS NULL $where ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset";
 $ExecQuery = MySQLi_query($db, $Query);
-
-$sql2 = "SELECT id FROM users $where";
-$result2 = mysqli_query($db,$sql2);
+//echo $Query; die();
+$sql = "SELECT id FROM users WHERE deleted_at IS NULL $where";
+$result2 = mysqli_query($db,$sql);
 $count = mysqli_num_rows($result2);
 
 $i = 1;
@@ -48,11 +54,11 @@ while ($value = MySQLi_fetch_array($ExecQuery)) {
    $res .=  "<td scope='row' id='numTd'>";
    $res .= $i;
    $res .= "</td>";
-   $res .=  "<td scope='row' class='username' onclick='showInForm(this)'><a>";
-   $res .= $value['username'];
-   $res .= "</a></td>";
-   $res .=  "<td scope='row' id='nameTd'>";
-   $res .= $value['name'];
+    $res .=  "<td scope='row' id='nameTd'>";
+    $res .= $value['name'];
+    $res .= "</td>";
+   $res .=  "<td scope='row' id='lastNameTd'>";
+   $res .= $value['last_name'];
    $res .= "</td>";
    $res .=  "<td scope='row' id='phoneTd'>";
    $res .= $value['phone'];
@@ -87,11 +93,35 @@ while ($value = MySQLi_fetch_array($ExecQuery)) {
    $res .=  "<td scope='row' id='scoreTd'>";
    $res .= $value['score'];
    $res .= "</td>";
-    $res .=  "<td scope='row' id='delTd'>";
+    $res .=  "<td scope='row' id='editTd'  onclick='showInForm(this)'><a>";
+    $res .= 'ویرایش';
+    $res .= "</a></td>";
+    $res .=  "<td scope='row' id='delTd' class='deleteTd' onclick='soft_delete($id,this)'>";
     $res .= 'حذف';
     $res .= "</td>";
    $res .= '</tr>';
    $i++;
+}
+$len = $row_per_page - $i;
+for($i=0; $i<=$len; $i++){
+    $res .= '<tr style="background-color: lightgrey;">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                </tr>';
 }
 
 // Pagination system
