@@ -56,15 +56,15 @@
                               <div class="right-side">
                                   <div class="form-group">
                                       <label for="name" class="label-custom"  >نام </label>
-                                      <input id="name" type="text" name="name" required="" pattern="[\u0600-\u06FF\s]*" onkeypress="just_persian(this)">
+                                      <input id="name" type="text" name="name" required="" pattern="[\u0600-\u06FF\s]*" onkeypress="just_persian(event)">
                                   </div>
                                   <div class="form-group">
                                       <label for="last_name" class="label-custom">نام خانوادگی</label>
-                                      <input id="last_name" type="text" name="last_name" required="">
+                                      <input id="last_name" type="text" name="last_name" required="" pattern="[\u0600-\u06FF\s]*" onkeypress="just_persian(event)">
                                   </div>
                                   <div class="form-group">
                                       <label for="mobile" class="label-custom">تلفن</label>
-                                      <input id="mobile" type="text" pattern="\d+" name="phone" min="10" maxlength="11" required="">
+                                      <input id="mobile" type="text" name="phone" min="11" maxlength="11" required="" pattern="\d+" onkeypress="just_number(event)">
                                   </div>
                               </div>
 
@@ -119,7 +119,7 @@
 
                                   <div class="form-group by-cash">
                                       <label for="buy_cash" class="label-custom">خرید نقدی</label>
-                                      <input id="buy_cash" type="text" name="buy_cash" class="money">
+                                      <input id="buy_cash" type="text" name="buy_cash" class="money" pattern="\d+" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
                                   <div class="form-group">
@@ -129,7 +129,7 @@
                                           <label for="passed" class="passed_label">پاس شده</label>
                                       </div>
                                       <label for="buy_2month" class="label-custom label-custom-passed">خرید دو ماهه</label>
-                                      <input id="buy_2month" type="text" name="buy_2month" class="money">
+                                      <input id="buy_2month" type="text" name="buy_2month" class="money" pattern="\d+" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
 
@@ -141,7 +141,7 @@
                                           <label for="passed_cheque" class="passed_label">پاس شده</label>
                                       </div>
                                       <label for="buy_cheque" class="label-custom label-custom-passed">خرید با چک</label>
-                                      <input id="buy_cheque" type="text" name="buy_cheque" class="money">
+                                      <input id="buy_cheque" type="text" name="buy_cheque" class="money" pattern="\d+" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
 
@@ -182,31 +182,35 @@
                                   </tr>
                                   </thead>
                                   <tbody id="ref_results">
-                                  <?php
-                                  for($i=0; $i<5; $i++){
-                                  echo '<tr style="background-color: lightgrey;">
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                      <td></td>
-                                  </tr>';
-                                  }
-                                  ?>
-
+                                  <?php for($i=0; $i<5; $i++){ ?>
+                                      <tr class="empty-row">
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                          <td></td>
+                                      </tr>
+                                  <?php } ?>
                                   </tbody>
                               </table>
-                              <div id="pagination_ref"></div>
+                              <div id="pagination_ref">
+                                  <div class="cell_disabled" data-val="1" onclick="paging(this)"><span>اول</span></div>
+                                  <div class="cell_disabled" data-val="1" onclick="paging(this)"><span>قبل</span></div>
+                                  <div class="cell_disabled" data-val="1" onclick="paging(this)"><span>1</span></div>
+                                  <div class="cell_disabled" data-val="2" onclick="paging(this)"><span>بعد</span></div>
+                                  <div class="cell_disabled" data-val="" onclick="paging(this)"><span>آخر</span></div>
+                              </div>
+                              </div>
                           </div>
                           <!--.................................................................................................................-->
 
@@ -221,7 +225,7 @@
               </div>
 
 <!--.................................................................................................................-->
-      <div class="">
+      <div>
           <div class="logo text-uppercase"><h2>لیست کاربران</h2></div>
       <!-- Search box. -->
           <div class="search_field">
@@ -323,7 +327,7 @@
 
                       $len = $row_per_page - $i;
                       for($i=0; $i<=$len; $i++){
-                          echo '<tr style="background-color: lightgrey;">
+                          echo '<tr  class="empty-row">
                                 <td></td>
                                 <td></td>
                                 <td></td>

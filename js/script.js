@@ -66,11 +66,9 @@ function add_reffered(source) {
                     td.id = 'selectTd';
                     td.addEventListener("change", change_time_td);
 
-                    var len = tableRef.rows.length;
                     tr.cells.namedItem('chbxtd').innerHTML = 'حذف';//add delete column to refferd table
                     tr.cells.namedItem('chbxtd').className = "deleteTd"; // add class name to delete column
                     tr.cells.namedItem('chbxtd').addEventListener("click", delete_record);// add event to delete column
-                    tr.cells.namedItem('numTd').innerHTML = len+1; // update number of column
                     tr.removeChild(tr.cells.namedItem('editTd')); // remove edit column
                     tr.removeChild(tr.cells.namedItem('delTd')); // remove soft delete column
 
@@ -79,8 +77,19 @@ function add_reffered(source) {
                     tr.cells.namedItem('buy_cheque_td').innerText  = cheque[0];
                     tr.cells.namedItem('cheque_passed_td').innerText  = chPassVal[0];
                     tr.cells.namedItem('month_passed_td').innerText  = MPassVal[0];
+                    // tableRef.appendChild(tr); // add row to ref table
+                    var len = tableRef.rows.length;
+                    for (var j = 0; j<len; j++) {
+                        var row = tableRef.rows[j];
+                        if(!$(row).data("id")) {
+                            tr.cells.namedItem('numTd').innerHTML = j+1; // update number of column
+                            row.innerHTML = tr.innerHTML;
+                            row.setAttribute("data-id", id);
+                            row.classList.remove('empty-row');
+                            break;
+                        }
+                    }
 
-                    tableRef.appendChild(tr); // add row to ref table
                 }else{
                     source.parentNode.parentNode.parentNode.style.backgroundColor = 'gray';
                     alert('این کاربر به ازای تمام خریدهایش قبلا معرفی شده است');
@@ -146,11 +155,13 @@ function get_referred() {
     var len = tableRef.rows.length;
     for (var i = 0; i<len; i++) {
         var row = tableRef.rows[i];
-        var order = row.getElementsByTagName('select')[0].value;
-        // var order = row.cells.namedItem('selectTd').firstChild.firstChild.innerHTML;
-        // alert(order);
-        var id = row.getAttribute('data-id');
-        refs+=',{'+id+'-'+order+'}';
+        if($(row).data("id")) {
+            var order = row.getElementsByTagName('select')[0].value;
+            // var order = row.cells.namedItem('selectTd').firstChild.firstChild.innerHTML;
+            // alert(order);
+            var id = row.getAttribute('data-id');
+            refs += ',{' + id + '-' + order + '}';
+        }
     }
     refs = refs.substring(1, refs.length );
     return refs;
@@ -591,13 +602,25 @@ function refresh_form() {
 //     }
 // });
 
-function just_persian(source){
-    str = source.value;
+function just_persian(event){
+    if (event.keyCode === 8) {
+        return;
+    }
+
+    str = String.fromCharCode(event.which);
     var p = /^[\u0600-\u06FF\s]+$/;
 
     if (!p.test(str)) {
-        source.value = null;
-        // $(str).val(null);
+        event.preventDefault();
         alert("فقط حروف فارسی قابل قبول است!");
+    }
+}
+function just_number(event){
+    str = String.fromCharCode(event.which);
+    var p = /^[\d+]+$/;
+
+    if (!p.test(str)) {
+        event.preventDefault();
+        alert("فقط عدد قابل قبول است!");
     }
 }
