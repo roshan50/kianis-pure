@@ -127,7 +127,7 @@ function delete_record(source) {
     }
 }
 
-function soft_delete(id,source) {
+function soft_delete(id) {
     var txt;
     var r = confirm("آیا مطمئنید میخواهید فرد با شناسه "+id+" را حذف کنید!");
     if (r == true) {
@@ -147,6 +147,26 @@ function soft_delete(id,source) {
     }
     alert(txt);
 
+}
+function active_delete(source,id) {
+    if(source.checked){
+        var link = $(source).parent().parent().find(".deactiveDel");
+        link.removeClass('deactiveDel');
+        link.addClass('deleteTd');
+        $( link ).click(function() {
+            soft_delete(id);
+        });
+        // link.addEventListener("click",test);
+    }else {
+        var link = $(source).parent().parent().find(".deleteTd");
+        link.removeClass('deleteTd');
+        link.addClass('deactiveDel');
+        $(link).off("click");
+        // link.removeEventListener("click", test);
+    }
+}
+function test() {
+    alert('test');
 }
 // these are for ajax form submit..................
 function get_referred() {
@@ -263,10 +283,10 @@ function showInForm(source){
 
     var chPassVal = tr.cells.namedItem('cheque_passed_td').innerText.split(",");
     document.getElementById('passed_cheque').value  = (chPassVal[0]=='پاس شده') ? 't' : 'f';
-    if(chPassVal[0]== 'پاس شده') document.getElementById('passed_cheque').checked = 'true';
+    if(chPassVal[0]== 'پاس شده') document.getElementById('passed_cheque').checked = true;
     var MPassVal = tr.cells.namedItem('month_passed_td').innerText.split(",");
     document.getElementById('passed').value  = (MPassVal[0]=='پاس شده') ? 't' : 'f';
-    if(MPassVal[0]== 'پاس شده') document.getElementById('passed').checked = 'true';
+    if(MPassVal[0]== 'پاس شده') document.getElementById('passed').checked = true;
 
 // load referred table..............................................................
     var referrd = tr.cells.namedItem('referredTd').innerText;
@@ -282,6 +302,8 @@ function showInForm(source){
         }//alert(ids);
 
         show_ref_list(ids,buy_times,'','','','created_at DESC');
+    }else{
+        empty_ref_table();
     }
 
 // create buy time select.......................................................
@@ -426,7 +448,10 @@ $(document).ready(function() {
                     document.getElementById("message").style.display = 'block';
                     $("#loading").css("display","none");
                     // alert(data);
-                    show_list('','','','','created_at DESC');
+                    if(data.indexOf(' با موفقیت اضافه شد.') > -1){
+                        show_list('','','','','created_at DESC');
+                        setTimeout(function() { refresh_form(); }, 5000);
+                    }
                 }
             });
         }//...................updateee........................
@@ -538,9 +563,10 @@ function show_list(cls,last_name_search,name_search,phone_search,sort_col) {
 }
 
 function sort(source){
-    var col = $(source).data("col");
-    // alert(col);
-    show_list('','','','',col);
+    var col = $(source).parent().parent().parent().data("col");
+    var sortType = $(source).data("type");
+    // alert(col+' '+sortType);
+    show_list('','','','',col+' '+sortType);
 }
 
 function show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,sort_col) {
@@ -563,15 +589,12 @@ function show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,s
 
         },
         success: function(data) { //alert(data);
-            $("#ref_results").html(data.table);
+            $("#ref_results").html(data.table); alert(data.table);
             $("#pagination_ref").html(data.pagination);
             // $("#loading").css("display","none");
         }
     });
 }
-
-
-
 
 function refresh_form() {
     document.getElementById("message").innerHTML = '';
@@ -585,25 +608,39 @@ function refresh_form() {
     document.getElementById('buy_2month').value  = '';
     document.getElementById('buy_cheque').value  = '';
     document.getElementById('gender').value  = 0;
-    // var chPassVal = (tr.cells.namedItem('cheque_passed_td').innerText == 'پاس نشده')? 0 :  1;
-    // document.getElementById('cheque_passed').value  = chPassVal;alert(0);
-    // var MPassVal = (tr.cells.namedItem('month_passed_td').innerText == 'پاس نشده')? 0 : 1;
-    // document.getElementById('month_passed').value  = MPassVal;
+    document.getElementById('passed').checked = false;
+    document.getElementById('passed_cheque').checked = false;
 
-    var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0].innerHTML = '';
+    empty_ref_table();
 }
 
-
-
-// $("#name").on("keyup", function () {
-//     if ($(this).val() == 0) {
-//         e.preventDefault();
-        // $(this).val(null);
-//     }
-// });
+function empty_ref_table() {
+    var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0];
+    tableRef.innerHTML = '';
+    var row = '<tr class="empty-row">\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            <td></td>\
+            </tr>';
+    for(var i=0; i<5; i++){
+        tableRef.innerHTML +=row;
+    }
+}
 
 function just_persian(event){
-    if (event.keyCode === 8) {
+    if (event.keyCode === 8 || event.keyCode === 9) {
         return;
     }
 
@@ -616,8 +653,12 @@ function just_persian(event){
     }
 }
 function just_number(event){
+    if (event.keyCode === 8 || event.keyCode === 9) {
+        return;
+    }
+
     str = String.fromCharCode(event.which);
-    var p = /^[\d+]+$/;
+    var p = /^\d([\,][\d])?$/; //    /^[\d+]+$/;
 
     if (!p.test(str)) {
         event.preventDefault();

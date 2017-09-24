@@ -99,6 +99,9 @@ input[type=checkbox]{
     color: red;
     cursor: pointer;
 }
+.deactiveDel{
+    color: grey;
+}
 
 #pagination {display: flex; justify-content: center;}
 #pagination div { display: inline-block; margin-right: 5px; margin-top: 5px }
@@ -129,4 +132,19 @@ input[type=checkbox]{
     border-radius: 9px;
     box-shadow: 2px 2px 2px #ccc;
     background: #601965 url("../images/select.png") no-repeat scroll 319px center;
+}
+.sort-arrow-div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.sort-arrow{
+    width: 20px;
+    height: auto;
+    cursor: pointer;
+}
+
+.flex-center{
+    display: flex;
+    justify-content: center;
 }

@@ -119,7 +119,7 @@
 
                                   <div class="form-group by-cash">
                                       <label for="buy_cash" class="label-custom">خرید نقدی</label>
-                                      <input id="buy_cash" type="text" name="buy_cash" class="money" pattern="\d+" onkeypress="just_number(event)">
+                                      <input id="buy_cash" type="text" name="buy_cash" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
                                   <div class="form-group">
@@ -129,7 +129,7 @@
                                           <label for="passed" class="passed_label">پاس شده</label>
                                       </div>
                                       <label for="buy_2month" class="label-custom label-custom-passed">خرید دو ماهه</label>
-                                      <input id="buy_2month" type="text" name="buy_2month" class="money" pattern="\d+" onkeypress="just_number(event)">
+                                      <input id="buy_2month" type="text" name="buy_2month" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
 
@@ -141,7 +141,7 @@
                                           <label for="passed_cheque" class="passed_label">پاس شده</label>
                                       </div>
                                       <label for="buy_cheque" class="label-custom label-custom-passed">خرید با چک</label>
-                                      <input id="buy_cheque" type="text" name="buy_cheque" class="money" pattern="\d+" onkeypress="just_number(event)">
+                                      <input id="buy_cheque" type="text" name="buy_cheque" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
 
@@ -225,7 +225,7 @@
               </div>
 
 <!--.................................................................................................................-->
-      <div>
+      <div class="form-inner">
           <div class="logo text-uppercase"><h2>لیست کاربران</h2></div>
       <!-- Search box. -->
           <div class="search_field">
@@ -246,7 +246,15 @@
                           <th>#</th>
                           <th>نام</th>
                           <th>نام خانوادگی</th>
-                          <th onclick="sort(this)" data-col="phone">موبایل</th>
+                          <th data-col="phone">
+                              <div class="flex-center">
+                              موبایل
+                                  <div class="sort-arrow-div">
+                                      <img src="images/up.png" class="sort-arrow" onclick="sort(this)" data-type="ASC"/>
+                                      <img src="images/down.png" class="sort-arrow" onclick="sort(this)" data-type="DESC">
+                                  </div>
+                              </div>
+                          </th>
                           <th>جنسیت</th>
                           <th>تاریخ تولد</th>
                           <th>خرید نقد</th>
@@ -255,7 +263,15 @@
                           <th>خرید با چک</th>
                           <th>پاس چک</th>
                           <th>معرفی ها</th>
-                          <th onclick="sort(this)" data-col="score">امتیاز</th>
+                          <th data-col="score">
+                              <div class="flex-center">
+                                  امتیاز
+                                  <div class="sort-arrow-div">
+                                      <img src="images/up.png" class="sort-arrow" onclick="sort(this)" data-type="ASC"/>
+                                      <img src="images/down.png" class="sort-arrow" onclick="sort(this)" data-type="DESC">
+                                  </div>
+                              </div>
+                          </th>
                           <th>ویرایش</th>
                           <th>حذف</th>
                       </tr>
@@ -267,12 +283,18 @@
                         $id = $value['id'];
                         echo "<tr data-id='$id'>";
                           echo  "<td scope='row' id='chbxtd'>";
-                          echo  "<div class='checkbox tooltip'>
-                                    <input type='checkbox' id='check$i' onclick='add_reffered(this)'>
-                                    <label for='check$i'></label>
+                          echo  "<div class='tooltip'>
+                                    <button class='btn-primary' onclick='add_reffered(this)'>انتخاب</button>
                                     <span class='tooltiptext'>اضافه به لیست معرفی ها</span>
-                                 </div>";// name='users'
+                                 </div>";
                           echo "</td>";
+//                          echo  "<td scope='row' id='chbxtd'>";
+//                          echo  "<div class='checkbox tooltip'>
+//                                    <input type='checkbox' id='check$i' onclick='add_reffered(this)'>
+//                                    <label for='check$i'></label>
+//                                    <span class='tooltiptext'>اضافه به لیست معرفی ها</span>
+//                                 </div>";
+//                          echo "</td>";
                           echo  "<td scope='row' id='numTd'>";
                           echo $i;
                           echo "</td>";
@@ -318,8 +340,12 @@
                           echo  "<td scope='row' id='editTd'  onclick='showInForm(this)'><a>"; //class='username'
                           echo 'ویرایش';
                           echo "</a></td>";
-                          echo  "<td scope='row' id='delTd' class='deleteTd' onclick='soft_delete($id,this)'>";
-                          echo 'حذف';
+                          echo "<td scope='row' id='delTd'>";
+                          echo "<div class='deactiveDel'>حذف</div>";// onclick='soft_delete($id,this)'
+                          echo "<div class='checkbox'>
+                                    <input type='checkbox' id='check$i' onclick='active_delete(this,$id)'>
+                                    <label for='check$i'></label>
+                                 </div>";
                           echo "</td>";
                         echo '</tr>';
                         $i++;

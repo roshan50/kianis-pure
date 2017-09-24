@@ -20,10 +20,10 @@ function return_zero_if_empty($user_data)
     return $user_data;
 }
 
-function check_duplicate($db, $column_name, $column_value)
+function check_duplicate($db, $column_name, $column_value,$and)
 {
     $return = false;
-    $sql = "SELECT id FROM users WHERE $column_name = '$column_value' AND deleted_at IS NULL";
+    $sql = "SELECT id FROM users WHERE $column_name = '$column_value' $and AND deleted_at IS NULL";
     $result = mysqli_query($db, $sql);
     $count = mysqli_num_rows($result);
 
@@ -111,11 +111,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $referred = return_null_if_empty(mysqli_real_escape_string($db, $_POST['referred']));
     $score = return_null_if_empty(mysqli_real_escape_string($db, $_POST['kian_fest_score']));
     $phone = mysqli_real_escape_string($db, $_POST['phone']);
-//    if (check_duplicate($db, 'phone', $phone)) {
-//        $message = "شماره تلفن تکراریست";
-//        echo $message;
-//        return;
-//    }
+    if (check_duplicate($db, 'phone', $phone,' AND id <> '.$id)) {
+        $message = "شماره تلفن تکراریست";
+        echo $message;
+        return;
+    }
+    if (strlen($phone)) {
+        $message = "شماره تلفن نامعتبر است!";
+        echo $message;
+        return;
+    }
     $gender = mysqli_real_escape_string($db, $_POST['gender']);
 
     $selectedBuy = mysqli_real_escape_string($db, $_POST['selectedBuy'])-1;

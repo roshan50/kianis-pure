@@ -149,6 +149,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo $message;
         return;
     }
+    if (strlen($phone) != 11) {
+        $message = "شماره تلفن نامعتبر است!";
+        echo $message;
+        return;
+    }
     $gender = mysqli_real_escape_string($db, $_POST['gender']);
     $birth_date = return_null_if_empty(mysqli_real_escape_string($db, $_POST['birth_date']));
     $buy_cash = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_cash']));
