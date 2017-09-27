@@ -1,7 +1,7 @@
 <?php
     include('include/session.php');
     include("include/db.php");
-    $row_per_page = 10;
+    $row_per_page = 7;
     $offset = 0;
     $sql = "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC  LIMIT $row_per_page OFFSET $offset";
     $result = mysqli_query($db,$sql);
@@ -14,11 +14,18 @@
         $pass_array = explode(',',$pass_stirng);
         $ret_pass_stirng = '';
         foreach ($pass_array as $pa){
-            $ret_pass = ($pa == 't')? 'پاس شده' : 'پاس نشده';
+            $ret_pass = ($pa == 't')? 'شده' : 'نشده';
             $ret_pass_stirng .= ','. $ret_pass;
         }
 
         return trim($ret_pass_stirng,',');
+    }
+
+    function get_one_passed($pass_stirng,$i){
+        $pass_array = explode(',',$pass_stirng);
+        $ret_pass = ($pass_array[$i] == 't')? 'شده' : 'نشده';
+
+        return $ret_pass;
     }
 ?>
 <html>
@@ -46,7 +53,6 @@
               <h2><a class="pull-me">افزودن فرد جدید</a></h2>
 
               <div class="panel">
-
                   <div id="message"></div>
                   <div id="loading"><img src="images/loading.gif" /></div>
                   <div class="new-user">
@@ -126,7 +132,7 @@
                                       <div class="pass_chbx_div" >
                                           <label for="passed" class="label-custom-chbx">پاس شده</label>
                                           <input type="checkbox" id="passed" class="passed" name="2month_passed"/>
-                                          <label for="passed" class="passed_label">پاس شده</label>
+                                          <label for="passed" class="passed_label">شده</label>
                                       </div>
                                       <label for="buy_2month" class="label-custom label-custom-passed">خرید دو ماهه</label>
                                       <input id="buy_2month" type="text" name="buy_2month" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
@@ -138,9 +144,9 @@
                                       <div class="pass_chbx_div" >
                                           <label for="passed_cheque" class="label-custom-chbx">پاس شده</label>
                                           <input type="checkbox" id="passed_cheque" class="passed" name="cheque_passed"/>
-                                          <label for="passed_cheque" class="passed_label">پاس شده</label>
+                                          <label for="passed_cheque" class="passed_label">شده</label>
                                       </div>
-                                      <label for="buy_cheque" class="label-custom label-custom-passed">خرید با چک</label>
+                                      <label for="buy_cheque" class="label-custom label-custom-passed">خرید چکی</label>
                                       <input id="buy_cheque" type="text" name="buy_cheque" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
@@ -150,7 +156,10 @@
 
                               </div>
                           </div>
-
+                          <div class="extraBtn">
+                              <a class="btn btn-primary"  id="myBtn">افزودن معرف</a>
+                              <a class="btn btn-primary" onclick="save_cancle()">لغو عملیات</a>
+                          </div>
 <!--.................................................................................................................-->
                           <div class="refered">
                               <div class="text-uppercase"><h2>لیست معرف ها</h2></div>
@@ -174,9 +183,9 @@
                                       <th>خرید چندم</th>
                                       <th>خرید نقد</th>
                                       <th>خرید دو ماهه</th>
-                                      <th>وصول</th>
-                                      <th>خرید با چک</th>
-                                      <th>پاس چک</th>
+                                      <th>پاس</th>
+                                      <th>خرید چکی</th>
+                                      <th>پاس</th>
                                       <th>معرفی ها</th>
                                       <th>امتیاز</th>
                                   </tr>
@@ -223,7 +232,37 @@
                       </form>
                   </div>
               </div>
+               <!--.................................................................................................................-->
+               <!-- The Modal -->
+               <div id="Modal_Form" class="modal">
+                   <!-- Modal content -->
+                   <div class="modal-content">
+                           <span class="close">&times;</span>
+                       <div class="modal-body">
+                           <div class="form-inner">
+                               <div id="ref_message"></div>
+                               <div class="logo text-uppercase">افزودن معرف جدید</div>
+                               <form id="ref-form">
+                                   <div class="form-group">
+                                       <label for="ref-name" class="label-custom">نام</label>
+                                       <input id="ref-name" type="text" name="name" required="">
+                                   </div>
+                                   <div class="form-group">
+                                       <label for="ref-lastname" class="label-custom">نام خانوادگی</label>
+                                       <input id="ref-lastname" type="text" name="last_name" required="">
+                                   </div>
+                                   <div class="form-group">
+                                       <label for="ref-phone" class="label-custom">تلفن</label>
+                                       <input id="ref-phone" type="text" name="phone" required="">
+                                   </div>
+                                   <div id="message"></div>
+                                   <button class = "btn btn-primary" type = "submit">ثبت معرف</button>
+                               </form>
+                           </div>
+                       </div>
+                   </div>
 
+               </div>
 <!--.................................................................................................................-->
       <div class="form-inner">
           <div class="logo text-uppercase"><h2>لیست کاربران</h2></div>
@@ -233,6 +272,38 @@
               <input type="text" id="last_name_search" class="search" placeholder="جستجو با نام خانوادگی" />
               <input type="text"  id="phone_search" class="search" placeholder="جستجو با شماره موبایل" />
           </div>
+      <!-- .......... -->
+      <!-- filter box. -->
+      <div class="filter_field">
+          <div class="filter_div">
+              <label for='customer'>خریدار</label>
+              <div class='checkbox'>
+                  <input type="radio" name="filter" checked id="customer"  class="filter" onclick="filter('100');"/>
+                  <label for='customer'></label>
+              </div>
+          </div>
+          <div class="filter_div">
+              <label for='ref'>معرف</label>
+              <div class='checkbox'>
+                  <input type="radio" name="filter" checked id="ref"  class="filter" onclick="filter('010');" />
+                  <label for='ref'></label>
+              </div>
+          </div>
+          <div class="filter_div">
+              <label for='customer_ref'>خریدار و معرف</label>
+              <div class='checkbox'>
+                  <input type="radio" name="filter" checked id="customer_ref"  class="filter" onclick="filter('001');" />
+                  <label for='customer_ref'></label>
+              </div>
+          </div>
+          <div class="filter_div">
+              <label for='all'>همه</label>
+              <div class='checkbox'>
+                  <input type="radio" name="filter" checked id="all"  class="filter" onclick="filter('111');" />
+                  <label for='all'></label>
+              </div>
+          </div>
+      </div>
       <!-- .......... -->
                   <table class="table" id="userTable">
                     <thead>
@@ -244,24 +315,32 @@
 <!--                              </div>-->
                           </th>
                           <th>#</th>
-                          <th>نام</th>
-                          <th>نام خانوادگی</th>
-                          <th data-col="phone">
+                          <th data-col="name">
                               <div class="flex-center">
-                              موبایل
+                                  نام
                                   <div class="sort-arrow-div">
                                       <img src="images/up.png" class="sort-arrow" onclick="sort(this)" data-type="ASC"/>
                                       <img src="images/down.png" class="sort-arrow" onclick="sort(this)" data-type="DESC">
                                   </div>
                               </div>
                           </th>
+                          <th data-col="last_name" style="width: 88.75px;">
+                              <div class="flex-center">
+                                  نام خانوادگی
+                                  <div class="sort-arrow-div">
+                                      <img src="images/up.png" class="sort-arrow" onclick="sort(this)" data-type="ASC"/>
+                                      <img src="images/down.png" class="sort-arrow" onclick="sort(this)" data-type="DESC">
+                                  </div>
+                              </div>                          </th>
+                          <th data-col="phone">موبایل</th>
                           <th>جنسیت</th>
                           <th>تاریخ تولد</th>
+                          <th>خرید چندم</th>
                           <th>خرید نقد</th>
                           <th>خرید دو ماهه</th>
-                          <th>وصول</th>
-                          <th>خرید با چک</th>
-                          <th>پاس چک</th>
+                          <th>پاس</th>
+                          <th>خرید چکی</th>
+                          <th>پاس</th>
                           <th>معرفی ها</th>
                           <th data-col="score">
                               <div class="flex-center">
@@ -314,22 +393,38 @@
                           echo  "<td scope='row' id='birthTd'>";
                           echo $value['birth_date'];
                           echo "</td>";
-                          echo  "<td scope='row' id='buy_cash_td'>";
-                          echo $value['buy_cash'];
+                          $cash = explode(',',$value['buy_cash']);
+                          echo  "<td scope='row' id='select_td'>";
+                          echo "<div id='buyselectionUserTd'>
+                                    <select id='buyTimeUserTd' onchange='change_user_buy_time(this)'>";
+                          for($j=1; $j<=count($cash); $j++){
+                              echo "<option value='$j'>$j</option>";
+                          }
+                          echo "</select></div></td>";
+                          $cash1 = $value['buy_cash'];
+                          echo  "<td scope='row' id='buy_cash_td' data-val='$cash1'>";
+
+                          echo $cash[0];
                           echo "</td>";
-                          echo  "<td scope='row' id='buy_2month_td'>";
-                          echo $value['buy_2month'];
+                          $month = $value['buy_2month'];
+                          echo  "<td scope='row' id='buy_2month_td' data-val='$month'>";
+                          $month = explode(',',$value['buy_2month']);
+                          echo $month[0];
                           echo "</td>";
                           $month_passed = $value['2month_passed'];
-                          echo  "<td scope='row' id='month_passed_td'>";
-                          echo get_passed($month_passed);
+                          $mpv = get_passed($month_passed);
+                          echo  "<td scope='row' id='month_passed_td' data-val='$mpv'>";
+                          echo get_one_passed($month_passed,0);
                           echo "</td>";
-                          echo  "<td scope='row' id='buy_cheque_td'>";
-                          echo $value['buy_cheque'];
+                          $cheque = $value['buy_cheque'];
+                          echo  "<td scope='row' id='buy_cheque_td' data-val='$cheque'>";
+                          $cheque = explode(',',$value['buy_cheque']);
+                          echo $cheque[0];
                           echo "</td>";
                           $cheque_passed = $value['cheque_passed'];
-                          echo  "<td scope='row' id='cheque_passed_td'>";
-                          echo get_passed($cheque_passed);
+                          $cpv = get_passed($cheque_passed);
+                          echo  "<td scope='row' id='cheque_passed_td' data-val='$cpv'>";
+                          echo get_one_passed($cheque_passed,0);
                           echo "</td>";
                           echo  "<td scope='row' id='referredTd'>";
                           echo $value['referred'];
@@ -354,6 +449,7 @@
                       $len = $row_per_page - $i;
                       for($i=0; $i<=$len; $i++){
                           echo '<tr  class="empty-row">
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>

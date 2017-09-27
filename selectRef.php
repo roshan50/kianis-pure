@@ -81,7 +81,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             $res .= $month[$buy_times[$j]-1];
             $res .= "</td>";
             $month_passed = explode(',',$value['2month_passed']);
-            $month_passed = ($month_passed[$buy_times[$j]-1] == 'f') ? 'پاس نشده' : 'پاس شده';
+            $month_passed = ($month_passed[$buy_times[$j]-1] == 'f') ? 'نشده' : 'شده';
             $res .= "<td scope='row' id='month_passed_td'>";
             $res .= $month_passed;
             $res .= "</td>";
@@ -90,7 +90,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             $res .= $cheque[$buy_times[$j]-1];
             $res .= "</td>";
             $cheque_passed = explode(',',$value['cheque_passed']);
-            $cheque_passed = ($cheque_passed[$buy_times[$j]-1] == 'f') ? 'پاس نشده' : 'پاس شده';
+            $cheque_passed = ($cheque_passed[$buy_times[$j]-1] == 'f') ? 'نشده' : 'شده';
             $res .= "<td scope='row' id='cheque_passed_td'>";
             $res .= $cheque_passed;
             $res .= "</td>";
@@ -105,7 +105,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $len = $row_per_page - $i;
         for($i=0; $i<=$len; $i++){
-            $res .= '<tr style="background-color: lightgrey;">
+            $res .= '<tr class="empty-row">
                                 <td></td>
                                 <td></td>
                                 <td></td>

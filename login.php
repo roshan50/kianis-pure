@@ -62,9 +62,12 @@ $(document).ready(function() {
                 $("#loading").css("display","block");
             },
             success: function (data) {
-                document.getElementById("message").innerHTML = data;
-                if(data == 'true') location.href = "index.php";
+                if(data == 'true'){
+                    location.href = "index.php";
+                    return;
+                }
                 $("#loading").css("display","none");
+                document.getElementById("message").innerHTML = data;
             }
         });
         // stop the form from submitting the normal way and refreshing the page

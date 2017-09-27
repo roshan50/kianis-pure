@@ -1233,7 +1233,7 @@ h2 a{ color: #601965;}
 }
 
 .panel{
-  display: none;
+  /*display: none;*/
 }
 
 .new-user-cols{
