@@ -1,8 +1,8 @@
 <?php
 include "include/db.php";
-function search_where($username_search,$name_search,$phone_search){
+function search_where($last_name_search,$name_search,$phone_search){
     $where = '';
-    if($username_search) { if($where) $and = "AND"; else $and = ""; $where.=" $and last_name LIKE '$username_search%'";}
+    if($last_name_search) { if($where) $and = "AND"; else $and = ""; $where.=" $and last_name LIKE '$last_name_search%'";}
     if($name_search){ if($where) $and = "AND"; else $and = ""; $where.=" $and name LIKE '$name_search%'";}
     if($phone_search){ if($where) $and = "AND";else $and = ""; $where.=" $and phone LIKE '$phone_search%'";}
 //    if($where) $where = "WHERE $where";
@@ -14,27 +14,23 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     $ids = $_POST['ids'];
     if(count($ids) > 0) {
         $row_per_page = 5;
-        if(isset($_POST['page'])){
-            $page = $_POST['page'];
-            $offset = ($page-1) * $row_per_page;
-        }else{
-            $offset = 0;
-            $page = 1;
-        }
+        $page = $_POST['page'];
+        $offset = ($page-1) * $row_per_page;
 
         $where = search_where($_POST['last_name_search'],$_POST['name_search'],$_POST['phone_search']);
+
         if(isset($_POST['sort_col'])){
             $sort_col = $_POST['sort_col'];
         }else{
             $sort_col = 'created_at DESC';
         }
-//        $sort_col = 'created_at DESC';
+        $sort_col = 'created_at DESC';
         //..................................................................................................
         $buy_times = $_POST['buy_times'];
         $Query = '';
         for ($i = 0; $i < count($ids); $i++) {
             $sql = "SELECT * FROM users WHERE id = $ids[$i] $where";
-            $Query .= $Query ? ' UNION ' . $sql : $sql;
+            $Query .= $Query ? ' UNION ALL ' . $sql : $sql;
         }
 
         $ExecQuery = MySQLi_query($db, $Query." ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset");
@@ -65,12 +61,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             $res .= "<td scope='row' id='birthTd'>";
             $res .= $value['birth_date'];
             $res .= "</td>";
-            $res .= "<td scope='row' id='selectTd' >";
+            $res .= "<td scope='row' id='buyTimeTd' >";
             $j = $i - 1;
-            $res .= "<div id='buyselectionTd'> 
-                      <select id='buyTimeTd'>";
-            $res .="<option>$buy_times[$j]</option>";
-            $res .="</select></div>";
+            $res .= "<div>";
+            $res .="$buy_times[$j]";
+            $res .="</div>";
             $res .= "</td>";
             $res .= "<td scope='row' id='buy_cash_td'>";
             $cash = explode(',',$value['buy_cash']);
@@ -124,7 +119,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                                 </tr>';
         }
 
-//        echo $res.$Query." ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset";
 
 
         $result2 = mysqli_query($db,$Query);
@@ -166,9 +160,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 //echo $pagination;
         $list = array(
+//            "obj" => $obj,
             "table" => $res,
             "pagination" => $pagination,
-            "count" => $Query
+            "count" => $Query." ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset"
         );
 
         print json_encode($list);

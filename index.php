@@ -1,6 +1,7 @@
 <?php
     include('include/session.php');
     include("include/db.php");
+//    include ("include/lib.php");
     $row_per_page = 7;
     $offset = 0;
     $sql = "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC  LIMIT $row_per_page OFFSET $offset";
@@ -95,7 +96,7 @@
 
                                   <div class="form-group">
                                       <label for="birth_date" class="label-custom">تاریخ تولد</label>
-                                      <input id="birth_date" type="text" name="birth_date" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" maxlength="10">
+                                      <input id="birth_date" type="text" name="birth_date" pattern="[0-9]{4}-(0[0-9]|1[012])-(0[0-9]|1[0-9]|2[0-9]|3[01])" maxlength="10">
                                       <img id="date_btn" src="images/cal.png" class="cal-img">
                                       <script>
                                           Calendar.setup({
@@ -125,7 +126,7 @@
 
                                   <div class="form-group by-cash">
                                       <label for="buy_cash" class="label-custom">خرید نقدی</label>
-                                      <input id="buy_cash" type="text" name="buy_cash" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
+                                      <input id="buy_cash" type="text" name="buy_cash" class="money" pattern="[0-9,]*" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
                                   <div class="form-group">
@@ -135,7 +136,7 @@
                                           <label for="passed" class="passed_label">شده</label>
                                       </div>
                                       <label for="buy_2month" class="label-custom label-custom-passed">خرید دو ماهه</label>
-                                      <input id="buy_2month" type="text" name="buy_2month" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
+                                      <input id="buy_2month" type="text" name="buy_2month" class="money"  pattern="[0-9,]*" onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
 
@@ -147,27 +148,27 @@
                                           <label for="passed_cheque" class="passed_label">شده</label>
                                       </div>
                                       <label for="buy_cheque" class="label-custom label-custom-passed">خرید چکی</label>
-                                      <input id="buy_cheque" type="text" name="buy_cheque" class="money" pattern="\d([\,][\d])?" onkeypress="just_number(event)">
+                                      <input id="buy_cheque" type="text" name="buy_cheque" class="money"  pattern="[0-9,]*"  onkeypress="just_number(event)">
                                       <label class="toman-label">تومان</label>
                                   </div>
 
 
-                                  <a id="save_new_buy" onclick="save_new_buy(this)">ثبت خرید جدید</a>
+                                  <a id="save_new_buy" class="insert btn btn-primary" onclick="save_new_buy(this)">ثبت خرید جدید</a> <!--  --!>
 
                               </div>
                           </div>
                           <div class="extraBtn">
-                              <a class="btn btn-primary"  id="myBtn">افزودن معرف</a>
-                              <a class="btn btn-primary" onclick="save_cancle()">لغو عملیات</a>
+                              <a class="btn btn-primary insert"  id="myBtn">افزودن معرف</a>
+                              <a class="btn btn-primary cancel" onclick="save_cancle()">لغو عملیات</a>
                           </div>
 <!--.................................................................................................................-->
                           <div class="refered">
                               <div class="text-uppercase"><h2>لیست معرف ها</h2></div>
                               <!-- Search box. -->
                               <div class="search_field">
-                                  <input id="name_search_ref"  class="search ref" placeholder="جستجو با نام" />
-                                  <input id="last_name_search_ref" class="search ref" placeholder="جستجو با نام خانوادگی" />
-                                  <input id="phone_search_ref" class="search ref" placeholder="جستجو با شماره موبایل" />
+                                  <input id="name_search_ref"  class="search_ref" placeholder="جستجو با نام" />
+                                  <input id="last_name_search_ref" class="search_ref" placeholder="جستجو با نام خانوادگی" />
+                                  <input id="phone_search_ref" class="search_ref" placeholder="جستجو با شماره موبایل" />
                               </div>
                               <!-- .......... -->
                               <table class="table" id="ref_table">
@@ -224,9 +225,9 @@
                           <!--.................................................................................................................-->
 
                           <div class="btns">
-                              <button class = "btn btn-primary btn-block" type = "submit" onclick="this.form.submited=this.name;"
+                              <button class = "btn btn-primary btn-block insert" id="save" type = "submit" onclick="this.form.submited=this.name;"
                                       name = "save">ثبت جدید</button>
-                              <button class = "btn btn-secondary btn-block" type = "submit" onclick="this.form.submited=this.name;"
+                              <button class = "btn btn-secondary btn-block insert" type = "submit" onclick="this.form.submited=this.name;"
                                       name = "edit">ثبت ویرایش</button>
                           </div>
                       </form>
@@ -245,15 +246,15 @@
                                <form id="ref-form">
                                    <div class="form-group">
                                        <label for="ref-name" class="label-custom">نام</label>
-                                       <input id="ref-name" type="text" name="name" required="">
+                                       <input id="ref-name" type="text" name="name" required="" pattern="[\u0600-\u06FF\s]*" onkeypress="just_persian(event)">
                                    </div>
                                    <div class="form-group">
-                                       <label for="ref-lastname" class="label-custom">نام خانوادگی</label>
+                                       <label for="ref-lastname" class="label-custom" pattern="[\u0600-\u06FF\s]*" onkeypress="just_persian(event)">نام خانوادگی</label>
                                        <input id="ref-lastname" type="text" name="last_name" required="">
                                    </div>
                                    <div class="form-group">
                                        <label for="ref-phone" class="label-custom">تلفن</label>
-                                       <input id="ref-phone" type="text" name="phone" required="">
+                                       <input id="ref-phone" type="text" name="phone" required="" min="11" maxlength="11" required="" pattern="\d" onkeypress="just_number(event)">
                                    </div>
                                    <div id="message"></div>
                                    <button class = "btn btn-primary" type = "submit">ثبت معرف</button>

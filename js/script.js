@@ -1,166 +1,108 @@
-// check box for passed cheque.....................
-// function toggle(source) {
-//     checkboxes = document.getElementsByName('users');
-//     for(var i=0;i<checkboxes.length;i++) {
-//         checkboxes[i].checked = source.checked;
-//     }
-// }
+function update_table_row_numbers(table,active_row_count) {
+    for (var i = 1; i <= active_row_count; i++) {
+        table.rows[i].cells.namedItem('numTd').innerHTML = i;
+    }
+}
 
-// function update_table_row_numbers(table) {
-//     for (var i = 0; i < table.rows.length; i++) {
-//         table.rows[i].cells.namedItem('numTd').innerHTML = i+1;
-//     }
-// }
+function put_ref_rows_in_array_obj() {
+    
+}
+
+function check_if_ref_in_table_ref(ref_id,ref_buy_time) {
+    var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0];
+    var len = tableRef.rows.length;
+    var flag = false;
+
+    for (var j = 0; j<len; j++) {
+        var row = tableRef.rows[j];
+        if($(row).data("id")) {
+            var row_id = $(row).data("id");
+            var order = row.cells.namedItem('buyTimeTd').innerText;
+            if(row_id == ref_id && order == ref_buy_time){
+                flag = true;
+                break;
+            }
+        }else{
+            break;
+        }
+    }
+
+    return flag;
+}
+
+function put_clone_tr_in_table_ref(clone_tr,id){
+    var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0];
+    var len = tableRef.rows.length;
+    var active_len = 0;
+    for (var j = 0; j < len; j++) { //add row to ref table in first gray(deactive) row
+        var row = tableRef.rows[j];//alert(j);
+        if (!$(row).data("id")) {
+            clone_tr.cells.namedItem('numTd').innerHTML = j + 1; // update number of column
+            row.innerHTML = clone_tr.innerHTML;
+            row.setAttribute("data-id", id);
+            row.classList.remove('empty-row');
+            break;
+        }
+        active_len++;
+    }
+
+    // if (active_len >= 5) {// go to next page
+    //     //save ref_table_info..............
+    //     var table_ref_cur_page = tableRef.innerHTML; //alert(table_ref_cur_page);
+    //     //make ref table next_page.........
+    //     empty_ref_table();
+    //     var row2 = tableRef.rows[0];
+    //     clone_tr.cells.namedItem('numTd').innerHTML = 1; // update number of column
+    //     row2.innerHTML = clone_tr.innerHTML;
+    //     row2.setAttribute("data-id", id);
+    //     row2.classList.remove('empty-row');
+    //     //paginagion.......................
+    //     document.getElementById('pagination_ref').innerHTML = create_ref_pagination(2, 2);
+    //     alert('not space ' + active_len);
+    // }
+
+    alert('شخص انتخاب شده به جدول معرفی ها اضافه شد!');
+}
 
 function add_reffered(source) {
-    var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0];
-   // // if(source.checked) {//insert row to ref table.................
-        var tr = source.parentNode.parentNode.parentNode.cloneNode(true);
-        var id = tr.getAttribute('data-id');//alert('id='+id);
+    var user_tr = source.parentNode.parentNode.parentNode;
+    var id = user_tr.getAttribute('data-id');//alert('id='+id);
+    var clone_tr = user_tr.cloneNode(true);
+    var BuyingTime = user_tr.cells.namedItem('select_td').getElementsByTagName('select')[0].value;//alert(BuyingTime);
 
-        var BuyingTime = tr.cells.namedItem('buy_cash_td').innerText.split(",").length; //alert('buyintime='+BuyingTime);
-        var row_count = 0;
-        var options = '';
+    $.ajax({
+        type: "POST",
+        url: "searchRef.php",
+        // dataType : 'JSON',
+        data: {
+            id: id,
+            buy_time: BuyingTime
+        },
+        success: function(count){//alert(count_arr);alert(count_arr.length);
+            if(count == 0){
+                var flag = check_if_ref_in_table_ref(id,BuyingTime);
+                if(flag){
+                    alert('شما قبلا این کاربر را برای این خریدش انتخاب کرده اید!');
+                }else {
+                    var td = clone_tr.insertCell(7);
+                    td.innerHTML = '<div>' + BuyingTime + '</div>';
+                    td.id = 'buyTimeTd';
 
-        $.ajax({
-            type: "POST",
-            url: "searchRef.php",
-            dataType : 'JSON',
-            data: {
-                id: id,
-                length: BuyingTime
-            },
-            success: function(count_arr){//alert(count_arr);alert(count_arr.length);
-                var cash = [];
-                var month = [];
-                var cheque = [];
-                var chPassVal = [];
-                var MPassVal = [];
+                    clone_tr.cells.namedItem('chbxtd').innerHTML = '<div onclick="delete_record(this)">حذف</div>';//add delete column to refferd table
+                    clone_tr.cells.namedItem('chbxtd').className = "deleteTd"; // add class name to delete column
 
-                var cash1 = tr.cells.namedItem('buy_cash_td').innerText.split(",");
-                var month1 = tr.cells.namedItem('buy_2month_td').innerText.split(",");
-                var cheque1 = tr.cells.namedItem('buy_cheque_td').innerText.split(",");
-                var chPassVal1 = tr.cells.namedItem('cheque_passed_td').innerText.split(",") ;
-                var MPassVal1 = tr.cells.namedItem('month_passed_td').innerText.split(",");
+                    clone_tr.removeChild(clone_tr.cells.namedItem('editTd')); // remove edit column
+                    clone_tr.removeChild(clone_tr.cells.namedItem('delTd')); // remove soft delete column
+                    clone_tr.removeChild(clone_tr.cells.namedItem('select_td')); // remove buy time column
 
-
-                var len = tableRef.rows.length;
-                var flag = true;
-                for(var i=0; i<count_arr.length; i++){// loop through every buying
-                    if(count_arr[i] == 0){ // if dose not have referred for this buying
-                        //check if it is in table ref...................
-                        var order;
-                        for (var j = 0; j<len; j++) {
-                            var row = tableRef.rows[j];
-                            if($(row).data("id")) {
-                                var row_id = $(row).data("id");
-                                if(row_id == id){
-                                    order = row.getElementsByTagName('select')[0].value;
-                                    if(order == i+1){ //alert('order='+order);
-                                        // alert(row.getElementsByTagName('select')[0].getElementsByTagName('option')[1].innerHTML);
-                                        // remove this order from this select box
-                                        // row.getElementsByTagName('select')[0].removeChild();
-
-                                        flag = false;
-                                        break;
-                                    }else {
-                                        flag = true;
-                                    }
-                                }
-                            }else{
-                                break;
-                            }
-                        }
-                        //...............................................
-                        //alert('i='+i+'flag='+flag);
-                        if(flag) {
-                            options += '<option value="' + (i + 1) + '">' + (i + 1) + '</option>';
-                            row_count++;
-                            cash.push(cash1[i]);
-                            month.push(month1[i]);
-                            cheque.push(cheque1[i]);
-                            chPassVal.push(chPassVal1[i]);
-                            MPassVal.push(MPassVal1[i]);
-                        }
-                    }
+                    put_clone_tr_in_table_ref(clone_tr,id);
                 }
-
-                if(row_count > 0){ //alert('row >1');
-                    var select = '<select id="buyTimeTd" onchange="change_time_td(this,'+id+')"> '+
-                                        options
-                                 +'</select>';
-                    // select.addEventListener("change", change_time_td);
-                    var td = tr.insertCell(7);
-                    td.innerHTML = '<div id="buyselectionTd">'+select+'</div>';
-                    td.id = 'selectTd';
-
-                    tr.cells.namedItem('chbxtd').innerHTML = '<div onclick="delete_record(this)">حذف</div>';//add delete column to refferd table
-                    tr.cells.namedItem('chbxtd').className = "deleteTd"; // add class name to delete column
-
-                    tr.removeChild(tr.cells.namedItem('editTd')); // remove edit column
-                    tr.removeChild(tr.cells.namedItem('delTd')); // remove soft delete column
-                    tr.removeChild(tr.cells.namedItem('select_td')); // remove buy time column
-
-                    tr.cells.namedItem('buy_cash_td').innerText = cash[0];
-                    tr.cells.namedItem('buy_2month_td').innerText  = month[0];
-                    tr.cells.namedItem('buy_cheque_td').innerText  = cheque[0];
-                    tr.cells.namedItem('cheque_passed_td').innerText  = chPassVal[0];
-                    tr.cells.namedItem('month_passed_td').innerText  = MPassVal[0];
-                    // tableRef.appendChild(tr); // add row to ref table
-                    var len = tableRef.rows.length;
-                    var active_len = 0;
-                    for (var j = 0; j<len; j++) { //add row to ref table in first gray(deactive) row
-                        var row = tableRef.rows[j];//alert(j);
-                        if(!$(row).data("id")) {
-                            tr.cells.namedItem('numTd').innerHTML = j+1; // update number of column
-                            row.innerHTML = tr.innerHTML;
-                            row.setAttribute("data-id", id);
-                            row.classList.remove('empty-row');
-                            break;
-                        }
-                        active_len ++;
-                    }
-
-                    if(active_len >= 5){// go to next page
-                        //save ref_table_info..............
-                        var table_ref_cur_page = tableRef.innerHTML; //alert(table_ref_cur_page);
-                        //make ref table next_page.........
-                        empty_ref_table();
-                        var row2 = tableRef.rows[0];
-                        tr.cells.namedItem('numTd').innerHTML = 1; // update number of column
-                        row2.innerHTML = tr.innerHTML;
-                        row2.setAttribute("data-id", id);
-                        row2.classList.remove('empty-row');
-                        //paginagion.......................
-                        document.getElementById('pagination_ref').innerHTML = create_ref_pagination(2,2);
-                        alert('not space '+active_len);
-
-                    }
-
-                }else{
-                    source.parentNode.parentNode.parentNode.style.backgroundColor = 'gray';
-                    alert('این کاربر به ازای تمام خریدهایش قبلا معرفی شده است');
-                }
-
+            }else{
+                source.parentNode.parentNode.parentNode.style.backgroundColor = 'gray';
+                alert('این کاربر به ازای این خرید قبلا معرفی شده است');
             }
-        });
-
-    // }
-    // else {// delete row from ref table ............................
-    //     var mobile = source.parentNode.parentNode.parentNode.cells.namedItem('phoneTd').innerText;
-    //
-    //     var len = tableRef.rows.length;
-    //     for (var i = 0; i < len; i++) {
-    //         var row = tableRef.rows[i];
-    //         if(mobile == row.cells.namedItem('phoneTd').innerText){
-    //             tableRef.removeChild(row);
-    //             break;
-    //         }
-    //     }//update numbers
-    //     for (var i = 0; i < tableRef.rows.length; i++) {
-    //         tableRef.rows[i].cells.namedItem('numTd').innerHTML = i+1;
-    //     }
-    // }
+        }
+    });
 }
 
 function create_ref_pagination(count,active) {
@@ -243,13 +185,11 @@ function active_delete(source,id) {
         $( link ).click(function() {
             soft_delete(id);
         });
-        // link.addEventListener("click",test);
     }else {
         var link = $(source).parent().parent().find(".deleteTd");
         link.removeClass('deleteTd');
         link.addClass('deactiveDel');
         $(link).off("click");
-        // link.removeEventListener("click", test);
     }
 }
 // these are for ajax form submit..................
@@ -260,7 +200,7 @@ function get_referred() {
     for (var i = 0; i<len; i++) {
         var row = tableRef.rows[i];
         if($(row).data("id")) {
-            var order = row.getElementsByTagName('select')[0].value;
+            var order = row.cells.namedItem('buyTimeTd').innerText;
             // var order = row.cells.namedItem('selectTd').firstChild.firstChild.innerHTML;
             // alert(order);
             var id = row.getAttribute('data-id');
@@ -287,17 +227,15 @@ function generate_password() {
 
 // this is for edit.......................
 function showInForm(source){
-    // $('.panel').slideDown('slow');
     $('html, body').animate({ scrollTop: 0 }, 'slow');
     // document.getElementsByClassName('buyselection')[0].style.display = 'flex';
     document.getElementsByClassName('buying')[0].style.display = 'flex';
     // document.getElementsByClassName('buyselection')[0].style.justifyContent = 'space-around';
-    document.getElementsByClassName('btn-primary')[0].style.display = 'none';
+    document.getElementById('save').style.display = 'none';
     document.getElementsByClassName('btn-secondary')[0].style.display = 'block';
     document.getElementsByClassName('pull-me')[0].innerHTML = 'ویرایش';
     //load input forms...........................................................
     var tr = source.parentNode;
-    // tr.style.backgroundColor = 'gray';
     remove_gray_bg_from_user_list();
     $(tr).addClass('gray_row');
     document.getElementById('last_name').value  = tr.cells.namedItem('lastNameTd').innerText;
@@ -331,9 +269,10 @@ function showInForm(source){
             ids.push(id);
             var buy_time = referrd[i].substring(referrd[i].indexOf('-')+1, referrd[i].indexOf('}'));
             buy_times.push(buy_time);
-        }//alert(ids);
+        }
+        // alert(ids);
 
-        show_ref_list(ids,buy_times,'','','','created_at DESC');
+        show_ref_list(ids,buy_times,'','','',1,'created_at DESC','111');
     }else{
         empty_ref_table();
     }
@@ -387,13 +326,10 @@ function save_new_buy(source) {
         url: 'newBuy.php',
         data: { 'cash': cash, 'month': month, 'cheque': cheque , 'id': id },
         beforeSend: function() {
-            // $("#loading").css("display","block");
         },
         success: function (data) {
             document.getElementById("message").innerHTML = data;
             document.getElementById("message").style.display = 'block';
-            // $("#loading").css("display","none");
-            // alert(data);
         }
     });
 }
@@ -424,30 +360,7 @@ function change_buy_time() {
     }
 }
 
-function change_time_td(source,id) {
-    var i = source.value - 1;
-    var row = source.parentNode.parentNode.parentNode;
-    var table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
-    for(var j=0; j<table.rows.length; j++){
-        var tr = table.rows[j];
-        if($(tr).data('id') == id){
-            var cash = tr.cells.namedItem('buy_cash_td').innerText.split(",");
-            var month = tr.cells.namedItem('buy_2month_td').innerText.split(",");
-            var cheque = tr.cells.namedItem('buy_cheque_td').innerText.split(",");
-            var chPassVal = tr.cells.namedItem('cheque_passed_td').innerText.split(",");
-            var MPassVal = tr.cells.namedItem('month_passed_td').innerText.split(",");
-
-            row.cells.namedItem('buy_cash_td').innerText = cash[i];
-            row.cells.namedItem('buy_2month_td').innerText  = month[i];
-            row.cells.namedItem('buy_cheque_td').innerText  = cheque[i];
-            row.cells.namedItem('cheque_passed_td').innerText  = chPassVal[i];
-            row.cells.namedItem('month_passed_td').innerText  = MPassVal[i];
-            break;
-        }
-    }
-}
-
-function change_user_buy_time(source) {
+function change_user_buy_time(source) {// this is for select inside user table
     var i = source.value - 1;
     var tr = source.parentNode.parentNode.parentNode;
 
@@ -466,31 +379,26 @@ function change_user_buy_time(source) {
 }
 //***********************************************************************************
 $(document).ready(function() {
-    // $('.pull-me').click(function() {
-    //     $('.panel').slideToggle('slow');
-    // });
-
-
     // Get the modal.....................................................
     var modal = document.getElementById('Modal_Form');
 
-// Get the button that opens the modal
+    // Get the button that opens the modal
     var btn = document.getElementById("myBtn");
 
-// Get the <span> element that closes the modal
+    // Get the <span> element that closes the modal
     var span = document.getElementsByClassName("close")[0];
 
-// When the user clicks the button, open the modal
+    // When the user clicks the button, open the modal
     btn.onclick = function() {
         modal.style.display = "block";
     }
 
-// When the user clicks on <span> (x), close the modal
+    // When the user clicks on <span> (x), close the modal
     span.onclick = function() {
         modal.style.display = "none";
     }
 
-// When the user clicks anywhere outside of the modal, close it
+    // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
@@ -536,7 +444,7 @@ $(document).ready(function() {
             $.ajax({
                 type: 'post',
                 url: 'userCreate.php',
-                data: $('form').serialize()+'&'+$.param({ 'password': password, 'referred': referrd }),
+                data: $('#user-form').serialize()+'&'+$.param({ 'password': password, 'referred': referrd }),
                 beforeSend: function() {
                     $("#loading").css("display","block");
                 },
@@ -559,7 +467,7 @@ $(document).ready(function() {
             $.ajax({
                 type: 'post',
                 url: 'updateUser.php',
-                data: $('form').serialize()+'&'+$.param({'id': id , 'referred': referrd }),
+                data: $('#user-form').serialize()+'&'+$.param({'id': id , 'referred': referrd }),
                 beforeSend: function() {
                     $("#loading").css("display","block");
                 },
@@ -587,18 +495,26 @@ $(document).ready(function() {
                 type: 'post',
                 url: 'refCreate.php',
                 data: $('#ref-form').serialize()+'&'+$.param({ 'password': password }),
+                dataType: 'json',
                 beforeSend: function() {
                     $("#loading").css("display","block");
                 },
                 success: function (data) {
-                    document.getElementById("ref_message").innerHTML = data;
+                    document.getElementById("ref_message").innerHTML = data.message;
                     document.getElementById("ref_message").style.display = 'block';
                     $("#loading").css("display","none");
                     // alert(data);
-                    if(data.indexOf(' با موفقیت اضافه شد.') > -1){
+                    // if(data.indexOf(' با موفقیت اضافه شد.') > -1){
+                    if(data.status == 200){
                         show_list('','','',1,'created_at DESC','111');
-                        // $('html, body').animate({ scrollTop: 0 }, 'slow');
-                        // setTimeout(function() { refresh_form(); }, 5000);
+                        // var tr = document.createElement("TR");
+                        // var x = tr.insertCell(0);
+                        // x.setAttribute("id", "numTd");
+                        var name = $("#ref-form input[name=name]").val();
+                        var last_name = $("#ref-form input[name=last_name]").val();
+                        var phone = $("#ref-form input[name=phone]").val();
+                        var record = {name:name, last_name:last_name, phone:phone, id:data.id};
+                        add_row_to_table_ref(record);
                     }
                 }
             });
@@ -612,46 +528,33 @@ $(document).ready(function() {
            return;
        }
 
-       var cls = this.className;
-       var last_name_search,name_search,phone_search;
-       if(cls.indexOf('ref') == -1){
-           last_name_search = $('#last_name_search').val();
-           name_search = $('#name_search').val();
-           phone_search = $('#phone_search').val();
-           show_list(last_name_search,name_search,phone_search,1,'created_at DESC','111');
-       }else{
-           last_name_search = $('#last_name_search_ref').val();
-           name_search = $('#name_search_ref').val();
-           phone_search = $('#phone_search_ref').val();
-           var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0];
-           var ids = [],buy_times = [];
-           for (var i = 0; i < tableRef.rows.length; i++) {
-               var row = tableRef.rows[i];
-               var id  = $(row).data("id");
-               ids.push(id);
-               // var buy_time = row.cells.namedItem('selectTd').firstChild.firstChild.value ;alert(buy_time);
-               var buy_time = row.getElementsByTagName('select')[0].value;//alert(buy_time);
-               buy_times.push(buy_time);
-           }
-           show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,'created_at DESC');
-       }
-
+       var last_name_search = $('#last_name_search').val();
+       var name_search = $('#name_search').val();
+       var phone_search = $('#phone_search').val();
+       show_list(last_name_search,name_search,phone_search,1,'created_at DESC','111');
    });
 
-    // $(".filter").click(function() {
-    //     var filter = '';
-    //     var chbx = document.getElementsByClassName('filter_div');
-    //     for(var i=0; i<3 ;i++)
-    //     {
-    //         var cb = chbx[i].getElementsByClassName("checkbox")[0].getElementsByTagName('input')[0];
-    //         filter += cb.checked ? '1' : '0';
-    //     }
-    //     alert(filter);
-    //
-    //     show_list('','','','','created_at DESC',filter);
-    //
-    // });
+   $(".search_ref").keyup(function(event) {
+        if (event.keyCode === 9 || event.keyCode === 32 ) {
+            return;
+        }
 
+        var last_name_search = $('#last_name_search_ref').val();
+        var name_search = $('#name_search_ref').val();
+        var phone_search = $('#phone_search_ref').val();
+        var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0];
+        var ids = [],buy_times = [];
+        for (var i = 0; i < tableRef.rows.length; i++) {
+            var row = tableRef.rows[i];
+            var id  = $(row).data("id");
+            ids.push(id);
+            // var buy_time = row.cells.namedItem('selectTd').firstChild.firstChild.value ;alert(buy_time);
+            var buy_time = row.getElementById('buyTimeTd').innerText;//alert(buy_time);
+            buy_times.push(buy_time);
+        }
+        show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,'created_at DESC','111');
+
+   });
 
     // ------------------------------------------------------- //
     // Transition Placeholders
@@ -672,9 +575,62 @@ $(document).ready(function() {
 
 });
 
+function add_row_to_table_ref(record) {
+    var tr = document.createElement("TR");
 
+    var x0 = tr.insertCell(0);
+    x0.setAttribute("id", "deleteTd");
+    x0.innerHTML = 'حذف';
+
+    var x1 = tr.insertCell(1);
+    x1.setAttribute("id", "numTd");
+
+    var x2 = tr.insertCell(2);
+    x2.setAttribute("id", "nameTd");
+    x2.innerHTML = record.name;
+
+    var x3 = tr.insertCell(3);
+    x3.setAttribute("id", "lastNameTd");
+    x3.innerHTML = record.last_name;
+
+    var x4 = tr.insertCell(4);
+    x4.setAttribute("id", "phoneTd");
+    x4.innerHTML = record.phone;
+
+    var x5 = tr.insertCell(5);
+    x5.setAttribute("id", "genderTd");
+    x5.innerHTML = 'مرد';
+
+    var x6 = tr.insertCell(6);
+    x6.setAttribute("id", "birthTd");
+
+    var x7 = tr.insertCell(7);
+    x7.setAttribute("id", "buyTimeTd");
+
+    var x8 = tr.insertCell(8);
+    x8.setAttribute("id", "buy_cash_td");
+
+    var x9 = tr.insertCell(9);
+    x9.setAttribute("id", "buy_2month_td");
+
+    var x10 = tr.insertCell(10);
+    x10.setAttribute("id", "month_passed_td");
+
+    var x11 = tr.insertCell(11);
+    x11.setAttribute("id", "buy_cheque_td");
+
+    var x12 = tr.insertCell(12);
+    x12.setAttribute("id", "cheque_passed_td");
+
+    var x13 = tr.insertCell(13);
+    x13.setAttribute("id", "referredTd");
+
+    var x14 = tr.insertCell(14);
+    x14.setAttribute("id", "scoreTd");
+
+    put_clone_tr_in_table_ref(tr,record.id);
+}
 function show_list(last_name_search,name_search,phone_search,page,sort_col,filter) {
-    var tempScrollTop = $(window).scrollTop();//for maintaning page scroll position after ajax call
     $.ajax({
         type: "POST",
         url: "search.php",
@@ -694,8 +650,6 @@ function show_list(last_name_search,name_search,phone_search,page,sort_col,filte
             $("#results").html(data.table);
             $("#pagination").html(data.pagination);
             // alert(data.count);
-            // $("#loading").css("display","none");
-            // $(window).scrollTop(tempScrollTop);//for maintaning page scroll position after ajax call
         }
     });
 }
@@ -703,7 +657,6 @@ function show_list(last_name_search,name_search,phone_search,page,sort_col,filte
 function sort(source){
     var col = $(source).parent().parent().parent().data("col");
     var sortType = $(source).data("type");
-    // alert(col+' '+sortType);
     show_list('','','',1,col+' '+sortType,'111');
 }
 
@@ -711,18 +664,9 @@ function sort(source){
 function paging(source){
     if(source.className != 'cell_disabled'){
         var page = $(source).data("val");
-        // alert(page);
-        var cls = source.parentNode.className;
-        var last_name_search,name_search,phone_search;
-        if(cls.indexOf('ref') == -1){
-            last_name_search = $('#last_name_search').val();
-            name_search = $('#name_search').val();
-            phone_search = $('#phone_search').val();
-        }else{
-            last_name_search = $('#last_name_search_ref').val();
-            name_search = $('#name_search_ref').val();
-            phone_search = $('#phone_search_ref').val();
-        }
+        var last_name_search = $('#last_name_search').val();
+        var name_search = $('#name_search').val();
+        var phone_search = $('#phone_search').val();
 
         var active = document.getElementsByClassName('cell_active');
         active[0].className = 'cell';
@@ -736,7 +680,7 @@ function filter(filter_case) {
     show_list('','','',1,'created_at DESC',filter_case);
 }
 
-function show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,sort_col) {
+function show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,page,sort_col,filter) {
     $.ajax({
         type: "POST",
         url: "selectRef.php",
@@ -745,20 +689,18 @@ function show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,s
             last_name_search: last_name_search,
             name_search: name_search ,
             phone_search: phone_search,
-            page: 1,
+            page: page,
             sort_col: sort_col,
+            filter: filter,
             ids: ids,
             buy_times : buy_times
         },
         beforeSend: function() {
-            // $("#loading").css("display","block");
-            $("#ref_results").html('<div id="loading"><img src="images/loading.gif" /></div>');
 
         },
-        success: function(data) { //alert(data);
+        success: function(data) { //alert(data.count);
             $("#ref_results").html(data.table); //alert(data.table);
             $("#pagination_ref").html(data.pagination);
-            // $("#loading").css("display","none");
         }
     });
 }
@@ -805,11 +747,12 @@ function empty_ref_table() {
         tableRef.innerHTML +=row;
     }
 }
-
+//..........................validations...........................................
 function just_persian(event){
     if (event.keyCode === 8 || event.keyCode === 9) {//backspace and tab
         return;
     }
+    if(event.which >= 37 && event.which <= 40) return;
 
     str = String.fromCharCode(event.which);
     var p = /^[\u0600-\u06FF\s]+$/;
@@ -823,6 +766,7 @@ function just_number(event){
     if (event.keyCode === 8 || event.keyCode === 9) {
         return;
     }
+    if(event.which >= 37 && event.which <= 40) return;
 
     str = String.fromCharCode(event.which);
     var p = /^\d([\,][\d])?$/; //    /^[\d+]+$/;
@@ -832,7 +776,7 @@ function just_number(event){
         alert("فقط عدد قابل قبول است!");
     }
 }
-
+//....................................................................................
 function save_cancle(){
     refresh_form();
     remove_gray_bg_from_user_list();

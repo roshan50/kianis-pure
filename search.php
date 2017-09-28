@@ -83,7 +83,7 @@ $i = 1;
 $res = '';
 while ($value = MySQLi_fetch_array($ExecQuery)) {
    $id = $value['id'];
-   $res .= '<tr>';
+   $res .= "<tr data-id='$id'>";
     $res .=  "<td scope='row' id='chbxtd'>";
     $res .=  "<div class='tooltip'>
                 <button class='btn-primary' onclick='add_reffered(this)'>انتخاب</button>
@@ -98,7 +98,7 @@ while ($value = MySQLi_fetch_array($ExecQuery)) {
 //                         </div>";
 //   $res .= "</td>";
    $res .=  "<td scope='row' id='numTd'>";
-   $res .= $i;
+   $res .= $i+($page-1)*$row_per_page;
    $res .= "</td>";
     $res .=  "<td scope='row' id='nameTd'>";
     $res .= $value['name'];

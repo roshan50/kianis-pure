@@ -14,6 +14,8 @@ function check_duplicate($db, $column_name, $column_value)
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $status = 500;
+    $id = 0;
     $name = mysqli_real_escape_string($db, $_POST['name']);
     $last_name = mysqli_real_escape_string($db, $_POST['last_name']);
     $password = mysqli_real_escape_string($db, $_POST['password']);
@@ -34,10 +36,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($db->query($sql) === TRUE) {
         $message = $last_name . " با موفقیت اضافه شد.";
+        $status = 200;
+        $id = mysqli_insert_id($db);
     } else {
         $message = "Error: " . $sql . "<br>" . $db->error;
     }
 
-    echo $message;
+    $res = array(
+        "message" => $message,
+        "status" => $status,
+        "id" => $id,
+        "count" => $sql
+    );
+
+    print json_encode($res);
 }
 ?>

@@ -125,13 +125,13 @@
 
 #save_new_buy{
     display: none;
-    line-height: 1.25;
-    border: 1px solid #adadad;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    background-color: #EFE7FF;
-    color: #666;
-    width: 20%;
+    /*line-height: 1.25;*/
+    /*border: 1px solid #adadad;*/
+    /*padding: 0.5rem 1rem;*/
+    /*border-radius: 0.25rem;*/
+    /*background-color: #EFE7FF;*/
+    /*color: #666;*/
+    /*width: 20%;*/
     margin: 20px auto;
 }
 /****************************************************************************/
@@ -199,4 +199,11 @@
     display: flex;
     justify-content: space-between;
     margin-top: 30px;
+}
+
+.cancel{
+    background-color: #bf3f3a;
+}
+.insert{
+    background-color: #29924f;
 }
