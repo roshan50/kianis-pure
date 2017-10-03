@@ -1,33 +1,17 @@
 <?php
     include('include/session.php');
     include("include/db.php");
-//    include ("include/lib.php");
-    $row_per_page = 7;
+    include ("include/lib.php");
+    include ("include/const.php");
+
+    $row_per_page = ROW_PER_PAGE;
     $offset = 0;
     $sql = "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC  LIMIT $row_per_page OFFSET $offset";
     $result = mysqli_query($db,$sql);
+
     $sql2 = "SELECT * FROM users WHERE deleted_at IS NULL";
     $result2 = mysqli_query($db,$sql2);
     $count = mysqli_num_rows($result2);
-
-
-    function get_passed($pass_stirng){
-        $pass_array = explode(',',$pass_stirng);
-        $ret_pass_stirng = '';
-        foreach ($pass_array as $pa){
-            $ret_pass = ($pa == 't')? 'شده' : 'نشده';
-            $ret_pass_stirng .= ','. $ret_pass;
-        }
-
-        return trim($ret_pass_stirng,',');
-    }
-
-    function get_one_passed($pass_stirng,$i){
-        $pass_array = explode(',',$pass_stirng);
-        $ret_pass = ($pass_array[$i] == 't')? 'شده' : 'نشده';
-
-        return $ret_pass;
-    }
 ?>
 <html>
    <head>
@@ -115,9 +99,7 @@
                                   <div class="form-group buyselection">
                                       <label for="gender" class="label-custom-select">خرید چندم </label>
                                       <div id="buyselection">
-                                          <select id="buyTime" name="selectedBuy">
-                                              <option value="1" selected>1</option>
-                                          </select>
+                                          <select id="buyTime" name="selectedBuy"></select>
                                       </div>
                                   </div>
                                   <a id="newBuy" onclick="new_buy()">خرید جدید</a>
@@ -153,17 +135,17 @@
                                   </div>
 
 
-                                  <a id="save_new_buy" class="insert btn btn-primary" onclick="save_new_buy(this)">ثبت خرید جدید</a> <!--  --!>
+                                  <a id="save_new_buy" class="insert btn btn-primary" onclick="save_new_buy(this)">ثبت خرید جدید</a>
 
                               </div>
                           </div>
                           <div class="extraBtn">
-                              <a class="btn btn-primary insert"  id="myBtn">افزودن معرف</a>
-                              <a class="btn btn-primary cancel" onclick="save_cancle()">لغو عملیات</a>
+                              <a class="btn btn-primary insert"  id="myBtn">افزودن خریدار جهت معرفی</a>
+
                           </div>
 <!--.................................................................................................................-->
                           <div class="refered">
-                              <div class="text-uppercase"><h2>لیست معرف ها</h2></div>
+                              <div class="text-uppercase"><h2>لیست خریدار(های) معرفی شده توسط <span id="ref_table_title_get_name_input"></span></h2></div>
                               <!-- Search box. -->
                               <div class="search_field">
                                   <input id="name_search_ref"  class="search_ref" placeholder="جستجو با نام" />
@@ -187,6 +169,7 @@
                                       <th>پاس</th>
                                       <th>خرید چکی</th>
                                       <th>پاس</th>
+                                      <th>جمع</th>
                                       <th>معرفی ها</th>
                                       <th>امتیاز</th>
                                   </tr>
@@ -194,6 +177,7 @@
                                   <tbody id="ref_results">
                                   <?php for($i=0; $i<5; $i++){ ?>
                                       <tr class="empty-row">
+                                          <td></td>
                                           <td></td>
                                           <td></td>
                                           <td></td>
@@ -229,6 +213,7 @@
                                       name = "save">ثبت جدید</button>
                               <button class = "btn btn-secondary btn-block insert" type = "submit" onclick="this.form.submited=this.name;"
                                       name = "edit">ثبت ویرایش</button>
+                              <a class="btn btn-primary cancel" onclick="save_cancle()">لغو عملیات</a>
                           </div>
                       </form>
                   </div>
@@ -254,7 +239,7 @@
                                    </div>
                                    <div class="form-group">
                                        <label for="ref-phone" class="label-custom">تلفن</label>
-                                       <input id="ref-phone" type="text" name="phone" required="" min="11" maxlength="11" required="" pattern="\d" onkeypress="just_number(event)">
+                                       <input id="ref-phone" type="text" name="phone" required="" min="11" maxlength="11" required=""  onkeypress="just_number(event)">
                                    </div>
                                    <div id="message"></div>
                                    <button class = "btn btn-primary" type = "submit">ثبت معرف</button>
@@ -309,12 +294,7 @@
                   <table class="table" id="userTable">
                     <thead>
                       <tr>
-                          <th>انتخاب معرف
-<!--                              <div class="checkbox">-->
-<!--                                  <input type='checkbox' id="checkall" onClick="toggle(this)">-->
-<!--                                  <label for="checkall"></label>-->
-<!--                              </div>-->
-                          </th>
+                          <th>انتخاب معرف</th>
                           <th>#</th>
                           <th data-col="name">
                               <div class="flex-center">
@@ -342,6 +322,7 @@
                           <th>پاس</th>
                           <th>خرید چکی</th>
                           <th>پاس</th>
+                          <th>جمع</th>
                           <th>معرفی ها</th>
                           <th data-col="score">
                               <div class="flex-center">
@@ -358,119 +339,7 @@
                     </thead>
                     <tbody id="results">
                       <?php
-                      $i = 1;
-                      foreach ($result as $key => $value) {
-                        $id = $value['id'];
-                        echo "<tr data-id='$id'>";
-                          echo  "<td scope='row' id='chbxtd'>";
-                          echo  "<div class='tooltip'>
-                                    <button class='btn-primary' onclick='add_reffered(this)'>انتخاب</button>
-                                    <span class='tooltiptext'>اضافه به لیست معرفی ها</span>
-                                 </div>";
-                          echo "</td>";
-//                          echo  "<td scope='row' id='chbxtd'>";
-//                          echo  "<div class='checkbox tooltip'>
-//                                    <input type='checkbox' id='check$i' onclick='add_reffered(this)'>
-//                                    <label for='check$i'></label>
-//                                    <span class='tooltiptext'>اضافه به لیست معرفی ها</span>
-//                                 </div>";
-//                          echo "</td>";
-                          echo  "<td scope='row' id='numTd'>";
-                          echo $i;
-                          echo "</td>";
-                          echo  "<td scope='row' id='nameTd'>";
-                          echo $value['name'];
-                          echo "</td>";
-                          echo  "<td scope='row' id='lastNameTd'>";
-                          echo $value['last_name'];
-                          echo "</td>";
-                          echo  "<td scope='row' id='phoneTd'>";
-                          echo $value['phone'];
-                          echo "</td>";
-                          $gender = ($value['gender']==0) ? 'مرد' : 'زن';
-                          echo  "<td scope='row' id='genderTd'>";
-                          echo $gender;
-                          echo "</td>";
-                          echo  "<td scope='row' id='birthTd'>";
-                          echo $value['birth_date'];
-                          echo "</td>";
-                          $cash = explode(',',$value['buy_cash']);
-                          echo  "<td scope='row' id='select_td'>";
-                          echo "<div id='buyselectionUserTd'>
-                                    <select id='buyTimeUserTd' onchange='change_user_buy_time(this)'>";
-                          for($j=1; $j<=count($cash); $j++){
-                              echo "<option value='$j'>$j</option>";
-                          }
-                          echo "</select></div></td>";
-                          $cash1 = $value['buy_cash'];
-                          echo  "<td scope='row' id='buy_cash_td' data-val='$cash1'>";
-
-                          echo $cash[0];
-                          echo "</td>";
-                          $month = $value['buy_2month'];
-                          echo  "<td scope='row' id='buy_2month_td' data-val='$month'>";
-                          $month = explode(',',$value['buy_2month']);
-                          echo $month[0];
-                          echo "</td>";
-                          $month_passed = $value['2month_passed'];
-                          $mpv = get_passed($month_passed);
-                          echo  "<td scope='row' id='month_passed_td' data-val='$mpv'>";
-                          echo get_one_passed($month_passed,0);
-                          echo "</td>";
-                          $cheque = $value['buy_cheque'];
-                          echo  "<td scope='row' id='buy_cheque_td' data-val='$cheque'>";
-                          $cheque = explode(',',$value['buy_cheque']);
-                          echo $cheque[0];
-                          echo "</td>";
-                          $cheque_passed = $value['cheque_passed'];
-                          $cpv = get_passed($cheque_passed);
-                          echo  "<td scope='row' id='cheque_passed_td' data-val='$cpv'>";
-                          echo get_one_passed($cheque_passed,0);
-                          echo "</td>";
-                          echo  "<td scope='row' id='referredTd'>";
-                          echo $value['referred'];
-                          echo "</td>";
-                          echo  "<td scope='row' id='scoreTd'>";
-                          echo $value['score'];
-                          echo "</td>";
-                          echo  "<td scope='row' id='editTd'  onclick='showInForm(this)'><a>"; //class='username'
-                          echo 'ویرایش';
-                          echo "</a></td>";
-                          echo "<td scope='row' id='delTd'>";
-                          echo "<div class='deactiveDel'>حذف</div>";// onclick='soft_delete($id,this)'
-                          echo "<div class='checkbox'>
-                                    <input type='checkbox' id='check$i' onclick='active_delete(this,$id)'>
-                                    <label for='check$i'></label>
-                                 </div>";
-                          echo "</td>";
-                        echo '</tr>';
-                        $i++;
-                      }
-
-                      $len = $row_per_page - $i;
-                      for($i=0; $i<=$len; $i++){
-                          echo '<tr  class="empty-row">
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                </tr>';
-                      }
-
-
+                        echo get_users_list($result,$row_per_page);
                       ?>
                     </tbody>
                   </table>
@@ -496,7 +365,6 @@
           </div>
         </div>
       </div>
-
 
        <!-- Including jQuery is required. -->
        <script type="text/javascript" src="js/google-ajax.js"></script>

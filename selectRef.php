@@ -37,11 +37,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $i = 1;
         $res = '';
+        $resultSet = array();
         while ($value = MySQLi_fetch_array($ExecQuery)) {
+            $resultSet[] = $value;// pass db array to js
             $id = $value['id'];
             $res .= "<tr data-id='$id'>";
-            $res .= "<td scope='row' id='deleteTd' class='deleteTd' onclick='delete_record(this)'>حذف";
-            $res .= "</td>";
+            $res .= "<td scope='row' id='chbxTd' class='deleteTd'><div onclick='delete_record(this)'>حذف";
+            $res .= "</div></td>";
             $res .= "<td scope='row' id='numTd'>";
             $res .= $i;
             $res .= "</td>";
@@ -89,6 +91,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             $res .= "<td scope='row' id='cheque_passed_td'>";
             $res .= $cheque_passed;
             $res .= "</td>";
+            $res .= "<td scope='row' id='sumTd'>";
+            $res .= '';
+            $res .= "</td>";
             $res .= "<td scope='row' id='referredTd'>";
             $res .= $value['referred'];
             $res .= "</td>";
@@ -101,6 +106,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         $len = $row_per_page - $i;
         for($i=0; $i<=$len; $i++){
             $res .= '<tr class="empty-row">
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -158,9 +164,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         $pagination .="' data-val='$page_count'  onclick='paging(this)'><span>آخر</span></div>";
 
 
+//        $ExecQuery2 = MySQLi_query($db, $Query." ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset");
+
 //echo $pagination;
         $list = array(
-//            "obj" => $obj,
+            "obj" => $resultSet,
             "table" => $res,
             "pagination" => $pagination,
             "count" => $Query." ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset"

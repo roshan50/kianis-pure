@@ -22,12 +22,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = mysqli_real_escape_string($db, $_POST['phone']);
     if (check_duplicate($db, 'phone', $phone)) {
         $message = "شماره تلفن تکراریست";
-        echo $message;
         return;
     }
     if (strlen($phone) != 11) {
         $message = "شماره تلفن نامعتبر است!";
-        echo $message;
         return;
     }
 

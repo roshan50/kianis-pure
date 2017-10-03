@@ -106,7 +106,7 @@ input[type=checkbox]{
 #pagination {display: flex; justify-content: center;}
 #pagination div { display: inline-block; margin-right: 5px; margin-top: 5px }
 #pagination .cell { border-radius: 3px; font-size: 11px; color: #333; padding: 8px; text-decoration:none; border: 1px solid #d3d3d3; background-color: #f8f8f8; }
-#pagination .cell:hover { border: 1px solid #c6c6c6; background-color: #EFE7FF;  }
+#pagination .cell:hover { border: 1px solid #c6c6c6; background-color: #EFE7FF;  cursor: pointer;}
 #pagination .cell_active span { border-radius: 3px; font-size: 11px; color: #333; padding: 8px; border: 1px solid #c6c6c6; background-color: #EFE7FF; }
 #pagination .cell_disabled span { border-radius: 3px; font-size: 11px; color: #777777; padding: 8px; border: 1px solid #dddddd; background-color: #ffffff; }
 
@@ -114,7 +114,7 @@ input[type=checkbox]{
 #pagination_ref {display: flex; justify-content: center;}
 #pagination_ref div { display: inline-block; margin-right: 5px; margin-top: 5px }
 #pagination_ref .cell { border-radius: 3px; font-size: 11px; color: #333; padding: 8px; text-decoration:none; border: 1px solid #d3d3d3; background-color: #f8f8f8; }
-#pagination_ref .cell:hover { border: 1px solid #c6c6c6; background-color: #EFE7FF;  }
+#pagination_ref .cell:hover { border: 1px solid #c6c6c6; background-color: #EFE7FF;  cursor: pointer;}
 #pagination_ref .cell_active span { border-radius: 3px; font-size: 11px; color: #333; padding: 8px; border: 1px solid #c6c6c6; background-color: #EFE7FF; }
 #pagination_ref .cell_disabled span { border-radius: 3px; font-size: 11px; color: #777777; padding: 8px; border: 1px solid #dddddd; background-color: #ffffff; }
 /*...........................*/

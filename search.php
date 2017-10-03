@@ -1,28 +1,13 @@
 <?php
 include "include/db.php";
-function get_passed($pass_stirng){
-    $pass_array = explode(',',$pass_stirng);
-    $ret_pass_stirng = '';
-    foreach ($pass_array as $pa){
-        $ret_pass = ($pa == 't')? 'شده' : 'نشده';
-        $ret_pass_stirng .= ','. $ret_pass;
-    }
+include ("include/lib.php");
+include ("include/const.php");
 
-    return trim($ret_pass_stirng,',');
-}
 
-function get_one_passed($pass_stirng,$i){
-    $pass_array = explode(',',$pass_stirng);
-    $ret_pass = ($pass_array[$i] == 't')? 'شده' : 'نشده';
+$row_per_page = ROW_PER_PAGE;
 
-    return $ret_pass;
-}
 function search_where($last_name_search,$name_search,$phone_search){
     $where = '';
-//    if($last_name_search) { $and = ($where) ? "AND" : ""; $where.=" $and last_name LIKE '%$last_name_search%'";}
-//    if($name_search){ $and = ($where) ? "AND" : ""; $where.=" $and name LIKE '%$name_search%'";}
-//    if($phone_search){ $and = ($where) ? "AND" : ""; $where.=" $and phone LIKE '%$phone_search%'";}
-//    if($where) $where = "WHERE $where";
 
     if($last_name_search) {  $where.=" AND last_name LIKE '$last_name_search%'";}
     if($name_search){ $where.=" AND name LIKE '$name_search%'";}
@@ -40,14 +25,9 @@ function filter_where($case){
 
      switch ($case){//$buy,$ref,$ref_buy
          case '111' : break;
-//         case '110' : $where= "($buy_where OR $ref_where)"; break;
-//         case '101' : $where= "($buy_where OR $ref_where)";break;
          case '100' : $where= $buy_where;break;
-//         case '011' : $where= "($buy_where OR $ref_where)";break;
          case '001' : $where= $buyRef_where;break;
          case '010' : $where= $ref_where;break;
-//         case '000' : $where= 0;break;
-
      }
 
     if($where) $where=' AND '.$where;
@@ -55,145 +35,32 @@ function filter_where($case){
 }
 
 
-$row_per_page = 7;
-if(isset($_POST['page'])){
+if($_POST['page'] != ''){
     $page = $_POST['page'];
     $offset = ($page-1) * $row_per_page;
 }else{
     $offset = 0;
     $page = 1;
 }
-//echo $page;
-$where = search_where($_POST['last_name_search'],$_POST['name_search'],$_POST['phone_search']);
-$filter_where = filter_where($_POST['filter']);
-if(isset($_POST['sort_col'])){
+
+if($_POST['sort_col'] != ''){
     $sort_col = $_POST['sort_col'];
 }else{
     $sort_col = 'created_at DESC';
 }
 
+$where = search_where($_POST['last_name_search'],$_POST['name_search'],$_POST['phone_search']);
+$filter_where = filter_where($_POST['filter']);
+
 $Query = "SELECT * FROM users WHERE deleted_at IS NULL $where $filter_where ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset";
 $ExecQuery = MySQLi_query($db, $Query);
-//echo $Query; die();
-$sql = "SELECT id FROM users WHERE deleted_at IS NULL $where $filter_where";
-$result2 = mysqli_query($db,$sql);
-$count = mysqli_num_rows($result2);
-
-$i = 1;
-$res = '';
-while ($value = MySQLi_fetch_array($ExecQuery)) {
-   $id = $value['id'];
-   $res .= "<tr data-id='$id'>";
-    $res .=  "<td scope='row' id='chbxtd'>";
-    $res .=  "<div class='tooltip'>
-                <button class='btn-primary' onclick='add_reffered(this)'>انتخاب</button>
-                <span class='tooltiptext'>اضافه به لیست معرفی ها</span>
-           </div>";
-    $res .= "</td>";
-//   $res .=  "<td scope='row' id='chbxtd'>";
-//   $res .=  "<div class='checkbox tooltip'>
-//                            <input type='checkbox' id='check$i' name='users' onclick='add_reffered(this)'>
-//                            <label for='check$i'></label>
-//                            <span class='tooltiptext'>اضافه به لیست معرفی ها</span>
-//                         </div>";
-//   $res .= "</td>";
-   $res .=  "<td scope='row' id='numTd'>";
-   $res .= $i+($page-1)*$row_per_page;
-   $res .= "</td>";
-    $res .=  "<td scope='row' id='nameTd'>";
-    $res .= $value['name'];
-    $res .= "</td>";
-   $res .=  "<td scope='row' id='lastNameTd'>";
-   $res .= $value['last_name'];
-   $res .= "</td>";
-   $res .=  "<td scope='row' id='phoneTd'>";
-   $res .= $value['phone'];
-   $res .= "</td>";
-   $gender = ($value['gender']==0) ? 'مرد' : 'زن';
-   $res .=  "<td scope='row' id='genderTd'>";
-   $res .= $gender;
-   $res .= "</td>";
-   $res .=  "<td scope='row' id='birthTd'>";
-   $res .= $value['birth_date'];
-   $res .= "</td>";
-    $cash = explode(',',$value['buy_cash']);
-    $res .=  "<td scope='row' id='select_td'>";
-    $res .= "<div id='buyselectionUserTd'>
-                 <select id='buyTimeUserTd' onchange='change_user_buy_time(this)'>";
-    for($j=1; $j<=count($cash); $j++){
-        $res .= "<option value='$j'>$j</option>";
-    }
-    $res .= "</select></div></td>";
-    $cash1 = $value['buy_cash'];
-   $res .=  "<td scope='row' id='buy_cash_td' data-val='$cash1'>";
-   $res .= $cash[0];
-   $res .= "</td>";
-    $month = $value['buy_2month'];
-    $res .=  "<td scope='row' id='buy_2month_td' data-val='$month'>";
-    $month = explode(',',$value['buy_2month']);
-    $res .= $month[0];
-    $res .= "</td>";
-    $month_passed = $value['2month_passed'];
-    $mpv = get_passed($month_passed);
-    $res .=  "<td scope='row' id='month_passed_td' data-val='$mpv'>";
-    $res .= get_one_passed($month_passed,0);
-    $res .= "</td>";
-    $cheque = $value['buy_cheque'];
-    $res .=  "<td scope='row' id='buy_cheque_td' data-val='$cheque'>";
-    $cheque = explode(',',$value['buy_cheque']);
-    $res .= $cheque[0];
-    $res .= "</td>";
-    $cheque_passed = $value['cheque_passed'];
-    $cpv = get_passed($cheque_passed);
-    $res .=  "<td scope='row' id='cheque_passed_td' data-val='$cpv'>";
-    $res .= get_one_passed($cheque_passed,0);
-    $res .= "</td>";
-   $res .=  "<td scope='row' id='referredTd'>";
-   $res .= $value['referred'];
-   $res .= "</td>";
-   $res .=  "<td scope='row' id='scoreTd'>";
-   $res .= $value['score'];
-   $res .= "</td>";
-    $res .=  "<td scope='row' id='editTd'  onclick='showInForm(this)'><a>";
-    $res .= 'ویرایش';
-    $res .= "</a></td>";
-    $res .= "<td scope='row' id='delTd'>";
-    $res .= "<div class='deactiveDel'>حذف</div>";// onclick='soft_delete($id,this)'
-    $res .= "<div class='checkbox'>
-                                    <input type='checkbox' id='check$i' onclick='active_delete(this,$id)'>
-                                    <label for='check$i'></label>
-                                 </div>";
-    $res .= "</td>";
-//    $res .=  "<td scope='row' id='delTd' class='deleteTd' onclick='soft_delete($id,this)'>";
-//    $res .= 'حذف';
-//    $res .= "</td>";
-   $res .= '</tr>';
-   $i++;
-}
-$len = $row_per_page - $i;
-for($i=0; $i<=$len; $i++){
-    $res .= '<tr style="background-color: lightgrey;">
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                </tr>';
-}
+$res = get_users_list($ExecQuery,$row_per_page);
 
 // Pagination system
+$sql = "SELECT id FROM users WHERE deleted_at IS NULL $where $filter_where";
+$result = mysqli_query($db,$sql);
+$count = mysqli_num_rows($result);
+
 $page_count = ceil($count/$row_per_page);
 $prev = $page-1;
 $pagination = '';

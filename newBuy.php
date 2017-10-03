@@ -1,62 +1,7 @@
 <?php
-const UNIT_OF_PAYMENT = 1000000;
-const _2MONTH_SCORE = 3;
-const CASH_SCORE = 5;
-const CHEQUE_SCORE = 0;
 include("include/db.php");
-function return_null_if_empty($user_data)
-{
-    return ($user_data == "")? "NULL" : $user_data;
-}
-
-function return_zero_if_empty($user_data)
-{
-    if ($user_data == "") {
-        $user_data = "0";
-    }
-    return $user_data;
-}
-
-/**
- * @param $buy_cash
- * @param $buy_2month
- * @param $buy_cheque
- * @return mixed
- */
-function calc_score($buy_cash, $buy_2month, $buy_cheque)
-{
-    return cacl_cash_score($buy_cash) + calc_2month_score($buy_2month) + calc_cheque_score($buy_cheque);
-}
-
-/**
- * @param $buy_cheque
- * @return mixed
- */
-function calc_cheque_score($buy_cheque)
-{
-    $score = floor($buy_cheque / UNIT_OF_PAYMENT) * CHEQUE_SCORE;
-    return $score;
-}
-
-/**
- * @param $buy_2month
- * @return mixed
- */
-function calc_2month_score($buy_2month)
-{
-    $score = floor($buy_2month / UNIT_OF_PAYMENT) * _2MONTH_SCORE;
-    return $score;
-}
-
-/**
- * @param $buy_cash
- * @return mixed
- */
-function cacl_cash_score($buy_cash)
-{
-    $score = floor($buy_cash / UNIT_OF_PAYMENT) * CASH_SCORE;
-    return $score;
-}
+include("include/lib.php");
+include("include/const.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id = mysqli_real_escape_string($db, $_POST['id']);
