@@ -6,26 +6,15 @@ var current_page = 1;//ref table
 var last_page = 1;//ref table
 //*******************************************************************
 $(document).ready(function() {
-    // Get the modal.....................................................
     var modal = document.getElementById('Modal_Form');
-
-    // Get the button that opens the modal
     var btn = document.getElementById("myBtn");
-
-    // Get the <span> element that closes the modal
     var span = document.getElementsByClassName("close")[0];
-
-    // When the user clicks the button, open the modal
     btn.onclick = function() {
         modal.style.display = "block";
     }
-
-    // When the user clicks on <span> (x), close the modal
     span.onclick = function() {
         modal.style.display = "none";
     }
-
-    // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
@@ -59,12 +48,10 @@ $(document).ready(function() {
     // new user ajax form......................
     $('#user-form').submit(function(event) {
         var referrd = get_referred(); //alert(referrd);
-        $(".money").each(function() {
-            var val = this.value;
-            val = val.replace(/,/g, "");
-            this.value = val;
-            // alert(this.value);
-        });
+
+        remove_camas();
+
+        $('html, body').animate({ scrollTop: 0 }, 'slow');
 
         if(this.submited == 'save'){
             var password = generate_password();
@@ -82,7 +69,6 @@ $(document).ready(function() {
                     // alert(data);
                     if(data.indexOf(' با موفقیت اضافه شد.') > -1){
                         show_list('','','',1,'created_at DESC','111');
-                        $('html, body').animate({ scrollTop: 0 }, 'slow');
                         setTimeout(function() { refresh_form(); }, 5000);
                     }
                 }
@@ -104,7 +90,6 @@ $(document).ready(function() {
                     $("#loading").css("display","none");
                     // alert(data);
                     show_list('','','',1,'created_at DESC','111');
-                    $('html, body').animate({ scrollTop: 0 }, 'slow');
                     setTimeout(function() { refresh_form(); }, 5000);
                 }
             });
@@ -209,6 +194,14 @@ $(document).ready(function() {
 
 });
 //**********************************************************************************************************************
+function remove_camas() {
+    $(".money").each(function() {
+        var val = this.value;
+        val = val.replace(/,/g, "");
+        this.value = val;
+        // alert(this.value);
+    });
+}
 function update_table_row_numbers(table,base) {
     for (var i = base; i < base+row_per_ref_page; i++) {
         var row = table.rows[i];
@@ -273,7 +266,29 @@ function put_clone_tr_in_table_ref(clone_tr,id){
         active_len = 0;
     }
 
-    alert('شخص انتخاب شده به جدول معرفی ها اضافه شد!');
+    add_ref_msg('شخص انتخاب شده به جدول معرفی ها اضافه شد!');
+}
+
+function add_ref_msg(msg) {
+    var g = document.createElement('div');
+    g.className='modal-content-add-ref-msg';
+    g.innerText = msg;
+    var modal = document.getElementById('modal-add-ref-msg');
+    modal.appendChild(g);
+    modal.style.display = 'block';
+    $( g ).fadeIn( "slow" );
+    setTimeout(function() {
+        $( g ).fadeOut( "slow" );
+     }, 1000);
+    // remove_msg(g);
+    setTimeout(function() { remove_msg(g); }, 2000);
+}
+function remove_msg(g) {
+    var modal = document.getElementById('modal-add-ref-msg');
+    modal.removeChild(g);
+    if(!modal.innerText){
+        modal.style.display = 'none';
+    }
 }
 
 function add_reffered(source) {
@@ -294,7 +309,8 @@ function add_reffered(source) {
             if(count == 0){
                 var flag = check_if_ref_in_table_ref(id,BuyingTime);
                 if(flag){
-                    alert('شما قبلا این کاربر را برای این خریدش انتخاب کرده اید!');
+                    add_ref_msg('شما قبلا این کاربر را برای این خریدش انتخاب کرده اید!');
+                    // alert('شما قبلا این کاربر را برای این خریدش انتخاب کرده اید!');
                 }else {
                     var td = clone_tr.insertCell(7);
                     td.innerHTML = '<div>' + BuyingTime + '</div>';
@@ -313,7 +329,8 @@ function add_reffered(source) {
                 }
             }else{
                 source.parentNode.parentNode.parentNode.style.backgroundColor = 'gray';
-                alert('این کاربر به ازای این خرید قبلا معرفی شده است');
+                add_ref_msg('این کاربر به ازای این خرید قبلا معرفی شده است');
+                // alert('این کاربر به ازای این خرید قبلا معرفی شده است');
             }
         }
     });
@@ -415,8 +432,12 @@ function showInForm(source){
     document.getElementsByClassName('pull-me')[0].innerHTML = 'ویرایش';
     //load input forms...........................................................
     var tr = source.parentNode;
-    document.getElementById('ref_table_title_get_name_input').innerText  = tr.cells.namedItem('nameTd').innerText+' '+tr.cells.namedItem('lastNameTd').innerText;
     remove_gray_bg_from_user_list();
+    // alert(tr.cells.namedItem('chbxtd').firstElementChild.firstElementChild.disabled);
+    tr.cells.namedItem('chbxtd').firstChild.getElementsByTagName('button')[0].disabled = true;
+    tr.cells.namedItem('chbxtd').firstChild.getElementsByTagName('button')[0].style.cursor= "default";
+
+    document.getElementById('ref_table_title_get_name_input').innerText  = tr.cells.namedItem('nameTd').innerText+' '+tr.cells.namedItem('lastNameTd').innerText;
     $(tr).addClass('gray_row');
     document.getElementById('last_name').value  = tr.cells.namedItem('lastNameTd').innerText;
     document.getElementById('name').value  = tr.cells.namedItem('nameTd').innerText;
@@ -460,17 +481,18 @@ function showInForm(source){
 // create buy time select.......................................................
     var id = tr.getAttribute('data-id');
     var select = document.getElementById('buyTime');
+    select.disabled = false;
     select.setAttribute('data-id', id);
     select.innerText = null;
     var cash = tr.cells.namedItem('buy_cash_td').getAttribute('data-val').split(',');
-    var len = tr.cells.namedItem('buy_cash_td').getAttribute('data-val') ? cash.length : 0;
+    var len = tr.cells.namedItem('buy_cash_td').innerText ? cash.length : 0;
     for (var i = 1; i<= len; i++){
         var opt = document.createElement('option');
         opt.value = i;
         opt.innerHTML = i;
         select.appendChild(opt);
     }
-
+    document.getElementById('newBuy').style.display = 'block';
     document.getElementById('save_new_buy').setAttribute('data-id', id);
 }
 document.getElementById("buyTime").addEventListener("change", change_buy_time);
@@ -482,6 +504,7 @@ function remove_gray_bg_from_user_list() {
         var row = table.rows[i];
         if($(row).data("id")) {
             $(row).removeClass('gray_row');
+            row.cells.namedItem('chbxtd').firstElementChild.firstElementChild.disabled = false;
         }
     }
 }
@@ -490,14 +513,20 @@ function new_buy() {
     document.getElementById('buy_cash').value  = '';
     document.getElementById('buy_2month').value  = '';
     document.getElementById('buy_cheque').value  = '';
+    //...........................................
+    var optCount = document.getElementById("buyTime").length;
+    var opt = document.createElement('option');
+    opt.value = optCount+1;
+    opt.innerHTML = optCount+1;
+    opt.selected = 'selected';
+    document.getElementById("buyTime").appendChild(opt);
+    document.getElementById("buyTime").disabled = true;
+    document.getElementById("newBuy").style.display  = 'none';
+    //............................................
     document.getElementById('save_new_buy').style.display  = 'block';
 }
 function save_new_buy(source) {
-    $(".money").each(function() {
-        var val = this.value;
-        val = val.replace(/,/g, "");
-        this.value = val;
-    });
+    remove_camas();
 
     var id = $(source).data('id');
     var cash = document.getElementById('buy_cash').value ? document.getElementById('buy_cash').value : 0 ;
@@ -513,18 +542,21 @@ function save_new_buy(source) {
         success: function (data) {
             document.getElementById("message").innerHTML = data;
             document.getElementById("message").style.display = 'block';
-            update_form_buy_select();
+            // update_form_buy_select();
+            document.getElementById("buyTime").disabled = false;
+            document.getElementById("newBuy").style.display  = 'block';
+            document.getElementById('save_new_buy').style.display  = 'none';
             update_user_table_row(id,cash,month,cheque,'نشده','نشده');
         }
     });
 }
 
-function update_form_buy_select() {
-    var buy_select = document.getElementById("buyTime");
-    var option = document.createElement("option");
-    option.text = parseInt(buy_select.options[buy_select.options.length - 1].value)+1;
-    buy_select.add(option);
-}
+// function update_form_buy_select() {
+//     var buy_select = document.getElementById("buyTime");
+//     var option = document.createElement("option");
+//     option.text = parseInt(buy_select.options[buy_select.options.length - 1].value)+1;
+//     buy_select.add(option);
+// }
 
 function update_user_table_row(id,newCash,newMonth,newCheque,newPass,newCpass) {
     var table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
@@ -559,11 +591,11 @@ function change_buy_time() {
         var tr = table.rows[j];
         if($(tr).data('id') == id){
             var cash = tr.cells.namedItem('buy_cash_td').getAttribute('data-val').split(",");
-            document.getElementById('buy_cash').value  = cash[i];
+            document.getElementById('buy_cash').value  = cash[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             var month = tr.cells.namedItem('buy_2month_td').getAttribute('data-val').split(",");
-            document.getElementById('buy_2month').value  = month[i];
+            document.getElementById('buy_2month').value  = month[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             var cheque = tr.cells.namedItem('buy_cheque_td').getAttribute('data-val').split(",");
-            document.getElementById('buy_cheque').value  = cheque[i];
+            document.getElementById('buy_cheque').value  = cheque[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
 
             var chPassVal = tr.cells.namedItem('cheque_passed_td').getAttribute('data-val').split(",");
@@ -587,9 +619,9 @@ function change_user_buy_time(source) {// this is for select inside user table
     var chPassVal = tr.cells.namedItem('cheque_passed_td').getAttribute('data-val').split(",");
     var MPassVal = tr.cells.namedItem('month_passed_td').getAttribute('data-val').split(",");
 
-    tr.cells.namedItem('buy_cash_td').innerText = cash[i];
-    tr.cells.namedItem('buy_2month_td').innerText  = month[i];
-    tr.cells.namedItem('buy_cheque_td').innerText  = cheque[i];
+    tr.cells.namedItem('buy_cash_td').innerText = cash[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    tr.cells.namedItem('buy_2month_td').innerText  = month[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    tr.cells.namedItem('buy_cheque_td').innerText  = cheque[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     tr.cells.namedItem('cheque_passed_td').innerText  = chPassVal[i];
     tr.cells.namedItem('month_passed_td').innerText  = MPassVal[i];
 
@@ -644,10 +676,11 @@ function paging(source){
 function filter(filter_case) {
     show_list('','','',1,'created_at DESC',filter_case);
 }
-
+//......................................................................................................
 function refresh_form() {
     document.getElementById("message").innerHTML = '';
     document.getElementById("message").style.display = 'none';
+    document.getElementById("ref_table_title_get_name_input").innerHTML = "";
 
     document.getElementById('last_name').value  = '';
     document.getElementById('name').value  = '';
@@ -660,10 +693,25 @@ function refresh_form() {
     document.getElementById('passed').checked = false;
     document.getElementById('passed_cheque').checked = false;
 
+    document.getElementById("save_new_buy").style.display = 'none';
+    document.getElementsByClassName('buying')[0].style.display = 'none';
+
     ref_table_array = [];
     ref_table_array_rows_page = [];
 
     full_ref_table_with_empty_rows(0);
+}
+//....................................................................................
+function save_cancle(){
+    refresh_form();
+    remove_gray_bg_from_user_list();
+
+
+    document.getElementById('save').style.display = 'block';
+    document.getElementsByClassName('btn-secondary')[0].style.display = 'none';
+    document.getElementsByClassName('pull-me')[0].innerHTML = 'افزودن فرد جدید';
+
+    // document.getElementById('pagination_ref').innerHTML = create_ref_pagination(1,1);
 }
 //..........................validations...........................................
 function just_persian(event){
@@ -694,18 +742,7 @@ function just_number(event){
         alert("فقط عدد قابل قبول است!");
     }
 }
-//....................................................................................
-function save_cancle(){
-    refresh_form();
-    remove_gray_bg_from_user_list();
 
-    document.getElementsByClassName('buying')[0].style.display = 'none';
-    document.getElementById('save').style.display = 'block';
-    document.getElementsByClassName('btn-secondary')[0].style.display = 'none';
-    document.getElementsByClassName('pull-me')[0].innerHTML = 'افزودن فرد جدید';
-
-    // document.getElementById('pagination_ref').innerHTML = create_ref_pagination(1,1);
-}
 
 //******************...Referred Table...***************************************************************************
 function show_ref_list(ids,buy_times,last_name_search,name_search,phone_search,page,sort_col,filter) {

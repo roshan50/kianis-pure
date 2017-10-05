@@ -197,6 +197,30 @@ function get_sum_buy($cash_arr,$month_arr,$cheque_arr){
     return $sum;
 }
 
+function put_cama_for_money($string){
+    $reverse_string='';
+    for ($i = strlen($string)-1; $i >= 0; $i--){
+        $char = substr( $string, $i, 1 );
+        $reverse_string .= $char;
+    }
+
+    $cama_string = '';
+    for ($i = 0; $i < strlen($reverse_string); $i++){
+        $char = substr( $reverse_string, $i, 1 );
+        if($i % 3 == 0 && $i != 0){
+            $cama_string .= ',';
+        }
+        $cama_string .= $char;
+    }
+    $reverse_string='';
+    for ($i = strlen($cama_string)-1; $i >= 0; $i--){
+        $char = substr( $cama_string, $i, 1 );
+        $reverse_string .= $char;
+    }
+
+    return $reverse_string;
+}
+
 function get_users_list($query_result,$row_per_page){
     $rows = '';
     $i = 1;
@@ -252,22 +276,22 @@ function get_users_list($query_result,$row_per_page){
         }
         $rows .= "</select></div></td>";
         $rows .=  "<td scope='row' id='buy_cash_td' data-val='$cash'>";
-        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :$cash_arr[0];
+        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :number_format((int)$cash_arr[0]);
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='buy_2month_td' data-val='$month'>";
-        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :$month_arr[0];
+        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :number_format((int)$month_arr[0]);
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='month_passed_td' data-val='$mpv'>";
         $rows .= get_one_passed($month_passed,0);
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='buy_cheque_td' data-val='$cheque'>";
-        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :$cheque_arr[0];
+        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :number_format((int)$cheque_arr[0]);
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='cheque_passed_td' data-val='$cpv'>";
         $rows .= get_one_passed($cheque_passed,0);
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='sumTd'>";
-        $rows .= $sum;
+        $rows .= number_format($sum);//put_cama_for_money($sum);
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='referredTd'>";
         $rows .= $value['referred'];

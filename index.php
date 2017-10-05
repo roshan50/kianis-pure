@@ -20,7 +20,6 @@
        <link rel="stylesheet" href="css\style.css">
        <link rel="stylesheet" href="css\table.css">
        <link rel="stylesheet" href="css\form.css">
-       <link rel="stylesheet" href="css\search.css">
    </head>
 
    <body lang="fa" dir="rtl">
@@ -35,7 +34,8 @@
                   <h2><a href = "logout.php">خروج</a></h2>
               </div>
 <!--.................................................................................................................-->
-              <h2><a class="pull-me">افزودن فرد جدید</a></h2>
+                 <img src="images/add-user.png" class="add-user-img" onclick="save_cancle()" />
+              <h2 class="pull-me">افزودن فرد جدید</h2>
 
               <div class="panel">
                   <div id="message"></div>
@@ -47,11 +47,11 @@
                               <div class="right-side">
                                   <div class="form-group">
                                       <label for="name" class="label-custom"  >نام </label>
-                                      <input id="name" type="text" name="name" required="" pattern="[\u0600-\u06FF\s]*" onkeypress="just_persian(event)">
+                                      <input id="name" type="text" name="name" required="" ">
                                   </div>
                                   <div class="form-group">
                                       <label for="last_name" class="label-custom">نام خانوادگی</label>
-                                      <input id="last_name" type="text" name="last_name" required="" pattern="[\u0600-\u06FF\s]*" onkeypress="just_persian(event)">
+                                      <input id="last_name" type="text" name="last_name" required="" ">
                                   </div>
                                   <div class="form-group">
                                       <label for="mobile" class="label-custom">تلفن</label>
@@ -145,7 +145,7 @@
                           </div>
 <!--.................................................................................................................-->
                           <div class="refered">
-                              <div class="text-uppercase"><h2>لیست خریدار(های) معرفی شده توسط <span id="ref_table_title_get_name_input"></span></h2></div>
+                              <div class="text-uppercase"><h2>خریدار(های) معرفی شده توسط <span id="ref_table_title_get_name_input"></span></h2></div>
                               <!-- Search box. -->
                               <div class="search_field">
                                   <input id="name_search_ref"  class="search_ref" placeholder="جستجو با نام" />
@@ -227,7 +227,7 @@
                        <div class="modal-body">
                            <div class="form-inner">
                                <div id="ref_message"></div>
-                               <div class="logo text-uppercase">افزودن معرف جدید</div>
+                               <h2>افزودن خریدار جدید و معرفی آن</h2>
                                <form id="ref-form">
                                    <div class="form-group">
                                        <label for="ref-name" class="label-custom">نام</label>
@@ -242,7 +242,7 @@
                                        <input id="ref-phone" type="text" name="phone" required="" min="11" maxlength="11" required=""  onkeypress="just_number(event)">
                                    </div>
                                    <div id="message"></div>
-                                   <button class = "btn btn-primary" type = "submit">ثبت معرف</button>
+                                   <button class = "btn btn-primary insert" type = "submit">ثبت معرف</button>
                                </form>
                            </div>
                        </div>
@@ -250,6 +250,10 @@
 
                </div>
 <!--.................................................................................................................-->
+       <div id="modal-add-ref-msg">
+
+       </div>
+
       <div class="form-inner">
           <div class="logo text-uppercase"><h2>لیست کاربران</h2></div>
       <!-- Search box. -->

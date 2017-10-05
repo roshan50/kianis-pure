@@ -22,13 +22,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cheque_passed = $row['cheque_passed'] . ',' . $cheque_passed;
 
 
-    $score = $old_score + calc_score($buy_cash, $buy_2month, $buy_cheque);
+    $score = $old_score + calc_score($buy_cash, $buy_2month, $buy_cheque,'NULL',$db);
     $sql = "UPDATE users SET `score` = $score,buy_cash = '$cash',buy_2month = '$month',
             buy_cheque = '$cheque',2month_passed='$month_passed',cheque_passed = '$cheque_passed' WHERE id = $id";
 
 
     if ($db->query($sql) === TRUE) {
-        $message =  " با موفقیت اضافه شد.";
+        $message =  "خرید جدید با موفقیت اضافه شد.";
     } else {
         $message = "Error: " . $sql . "<br>" . $db->error;
     }
