@@ -6,20 +6,20 @@ var current_page = 1;//ref table
 var last_page = 1;//ref table
 //*******************************************************************
 $(document).ready(function() {
-    var modal = document.getElementById('Modal_Form');
-    var btn = document.getElementById("myBtn");
-    var span = document.getElementsByClassName("close")[0];
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
+    // var modal = document.getElementById('Modal_Form');
+    // var btn = document.getElementById("myBtn");
+    // var span = document.getElementsByClassName("close")[0];
+    // btn.onclick = function() {
+    //     modal.style.display = "block";
+    // }
+    // span.onclick = function() {
+    //     modal.style.display = "none";
+    // }
+    // window.onclick = function(event) {
+    //     if (event.target == modal) {
+    //         modal.style.display = "none";
+    //     }
+    // }
     //.................................................................
 
     // cama seperated inputs..................
@@ -35,14 +35,6 @@ $(document).ready(function() {
     $("#birth_date").keyup(function(event) {
         // skip for arrow keys
         if(event.which >= 37 && event.which <= 40) return;
-
-        // var val = this.value;
-        // if(val.length == 4){
-        //     this.value+='-';
-        // }
-        // if(val.length == 7){
-        //     this.value+='-';
-        // }
     });
 
     // new user ajax form......................
@@ -63,13 +55,14 @@ $(document).ready(function() {
                     $("#loading").css("display","block");
                 },
                 success: function (data) {
-                    document.getElementById("message").innerHTML = data;
-                    document.getElementById("message").style.display = 'block';
+                    // document.getElementById("message").innerHTML = data;
+                    // document.getElementById("message").style.display = 'block';
+                    show_save_message(data);
                     $("#loading").css("display","none");
                     // alert(data);
                     if(data.indexOf(' با موفقیت اضافه شد.') > -1){
                         show_list('','','',1,'created_at DESC','111');
-                        setTimeout(function() { refresh_form(); }, 5000);
+                        setTimeout(function() { refresh_form(); }, 1000);
                     }
                 }
             });
@@ -85,12 +78,13 @@ $(document).ready(function() {
                     $("#loading").css("display","block");
                 },
                 success: function (data) {
-                    document.getElementById("message").innerHTML = data;
-                    document.getElementById("message").style.display = 'block';
+                    // document.getElementById("message").innerHTML = data;
+                    // document.getElementById("message").style.display = 'block';
+                    show_save_message(data);
                     $("#loading").css("display","none");
                     // alert(data);
                     show_list('','','',1,'created_at DESC','111');
-                    setTimeout(function() { refresh_form(); }, 5000);
+                    setTimeout(function() { save_cancle(); }, 1000);
                 }
             });
         }
@@ -194,6 +188,13 @@ $(document).ready(function() {
 
 });
 //**********************************************************************************************************************
+function show_save_message(msg) {
+    $('.wrap').addClass('active');
+    $('.content').text(msg);
+    setTimeout(function() { $('.wrap').removeClass('active'); }, 2000);
+    // return false;
+}
+
 function remove_camas() {
     $(".money").each(function() {
         var val = this.value;
@@ -202,6 +203,7 @@ function remove_camas() {
         // alert(this.value);
     });
 }
+
 function update_table_row_numbers(table,base) {
     for (var i = base; i < base+row_per_ref_page; i++) {
         var row = table.rows[i];
@@ -276,10 +278,13 @@ function add_ref_msg(msg) {
     var modal = document.getElementById('modal-add-ref-msg');
     modal.appendChild(g);
     modal.style.display = 'block';
+    if(msg.indexOf('شخص انتخاب شده به جدول معرفی ها اضافه شد!') == -1){
+        g.style.backgroundColor = '#bf3f3a';
+    }
     $( g ).fadeIn( "slow" );
     setTimeout(function() {
         $( g ).fadeOut( "slow" );
-     }, 1000);
+     }, 1700);
     // remove_msg(g);
     setTimeout(function() { remove_msg(g); }, 2000);
 }
@@ -365,13 +370,17 @@ function soft_delete(id) {
             success: function(data) {
                 show_list('','','',1,'created_at DESC','111');
                 txt = "حذف با موفقیت انجام شد!";
+                alert(txt);
+                // document.getElementsByClassName('wrap')[0].style.top = '75%';
+                // document.getElementsByClassName('wrap')[0].style.bottom = '15%';
+                // show_save_message(txt);
             }
         });
     } else {
         txt = "عملیات حذف لغو شد!";
+        alert(txt);
+        // show_save_message(txt);
     }
-    alert(txt);
-
 }
 function active_delete(source,id) {
     if(source.checked){
@@ -421,8 +430,24 @@ function generate_password() {
     return token;
 }
 
-// this is for edit.......................
-function showInForm(source){
+// this is for edit............................................................................
+function make_ready_for_edit(source) {
+    var tr = source.parentNode;
+
+    make_appearance_ready_for_edit(tr);
+    //load input forms.................
+    show_in_form(tr);
+    // load referred table.............
+    remove_gray_bg_from_user_list();
+    load_ref_table(tr);
+    // create buy time select..........
+    var id = tr.getAttribute('data-id');
+    create_buy_time_part_for_edit(tr,id);
+    // this is for keep editable row after paging
+    document.getElementById('userTable').setAttribute('data-selectedId', id);
+}
+
+function make_appearance_ready_for_edit(tr) {
     $('html, body').animate({ scrollTop: 0 }, 'slow');
     // document.getElementsByClassName('buyselection')[0].style.display = 'flex';
     document.getElementsByClassName('buying')[0].style.display = 'flex';
@@ -430,15 +455,17 @@ function showInForm(source){
     document.getElementById('save').style.display = 'none';
     document.getElementsByClassName('btn-secondary')[0].style.display = 'block';
     document.getElementsByClassName('pull-me')[0].innerHTML = 'ویرایش';
-    //load input forms...........................................................
-    var tr = source.parentNode;
-    remove_gray_bg_from_user_list();
+
     // alert(tr.cells.namedItem('chbxtd').firstElementChild.firstElementChild.disabled);
+    $(tr).addClass('gray_row');
     tr.cells.namedItem('chbxtd').firstChild.getElementsByTagName('button')[0].disabled = true;
     tr.cells.namedItem('chbxtd').firstChild.getElementsByTagName('button')[0].style.cursor= "default";
+}
 
-    document.getElementById('ref_table_title_get_name_input').innerText  = tr.cells.namedItem('nameTd').innerText+' '+tr.cells.namedItem('lastNameTd').innerText;
-    $(tr).addClass('gray_row');
+function show_in_form(tr){
+    document.getElementById('ref_table_title_get_name_input').innerText  = tr.cells.namedItem('nameTd').innerText
+        +' '+tr.cells.namedItem('lastNameTd').innerText;
+
     document.getElementById('last_name').value  = tr.cells.namedItem('lastNameTd').innerText;
     document.getElementById('name').value  = tr.cells.namedItem('nameTd').innerText;
     document.getElementById('mobile').value  = tr.cells.namedItem('phoneTd').innerText;
@@ -452,14 +479,32 @@ function showInForm(source){
     var cheque = tr.cells.namedItem('buy_cheque_td').innerText;
     document.getElementById('buy_cheque').value  = cheque;
 
-    var chPassVal = tr.cells.namedItem('cheque_passed_td').innerText;
-    document.getElementById('passed_cheque').value  = (chPassVal=='شده') ? 't' : 'f';
-    if(chPassVal== 'شده') document.getElementById('passed_cheque').checked = true;
-    var MPassVal = tr.cells.namedItem('month_passed_td').innerText;
-    document.getElementById('passed').value  = (MPassVal=='شده') ? 't' : 'f';
-    if(MPassVal== 'شده') document.getElementById('passed').checked = true;
+    if(month != '0') document.getElementById('passed').disabled = false;
+    if(cheque != '0') document.getElementById('passed_cheque').disabled = false;
 
-// load referred table..............................................................
+    var chPassVal = tr.cells.namedItem('cheque_passed_td').innerText;
+    document.getElementById('passed_cheque').value  = (chPassVal=='خورده') ? 't' : 'f';
+    if(chPassVal== 'خورده') document.getElementById('passed_cheque').checked = true;
+    var MPassVal = tr.cells.namedItem('month_passed_td').innerText;
+    document.getElementById('passed').value  = (MPassVal=='خورده') ? 't' : 'f';
+    if(MPassVal== 'خورده') document.getElementById('passed').checked = true;
+}
+document.getElementById("buyTime").addEventListener("change", change_buy_time);
+
+function remove_gray_bg_from_user_list() {
+    var table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+    document.getElementById('userTable').setAttribute('data-selectedId',0);
+    var len = table.rows.length;
+    for (var i = 0; i<len; i++) {
+        var row = table.rows[i];
+        if($(row).data("id")) {
+            $(row).removeClass('gray_row');
+            row.cells.namedItem('chbxtd').firstElementChild.firstElementChild.disabled = false;
+        }
+    }
+}
+
+function load_ref_table(tr) {
     var referrd = tr.cells.namedItem('referredTd').innerText;
     if(referrd != 'NULL'){
         referrd = referrd.split(",");
@@ -472,14 +517,11 @@ function showInForm(source){
             buy_times.push(buy_time);
         }
         // alert(ids);
-
         show_ref_list(ids,buy_times,'','','',1,'created_at DESC','111');
-    }else{
-        full_ref_table_with_empty_rows(0);
     }
+}
 
-// create buy time select.......................................................
-    var id = tr.getAttribute('data-id');
+function create_buy_time_part_for_edit(tr,id) {
     var select = document.getElementById('buyTime');
     select.disabled = false;
     select.setAttribute('data-id', id);
@@ -495,20 +537,7 @@ function showInForm(source){
     document.getElementById('newBuy').style.display = 'block';
     document.getElementById('save_new_buy').setAttribute('data-id', id);
 }
-document.getElementById("buyTime").addEventListener("change", change_buy_time);
-
-function remove_gray_bg_from_user_list() {
-    var table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
-    var len = table.rows.length;
-    for (var i = 0; i<len; i++) {
-        var row = table.rows[i];
-        if($(row).data("id")) {
-            $(row).removeClass('gray_row');
-            row.cells.namedItem('chbxtd').firstElementChild.firstElementChild.disabled = false;
-        }
-    }
-}
-
+//********************************************************************************************************
 function new_buy() {
     document.getElementById('buy_cash').value  = '';
     document.getElementById('buy_2month').value  = '';
@@ -546,7 +575,8 @@ function save_new_buy(source) {
             document.getElementById("buyTime").disabled = false;
             document.getElementById("newBuy").style.display  = 'block';
             document.getElementById('save_new_buy').style.display  = 'none';
-            update_user_table_row(id,cash,month,cheque,'نشده','نشده');
+            // update_user_table_row(id,cash,month,cheque,'نخورده','نخورده');
+            show_list('','','',1,'created_at DESC','111');
         }
     });
 }
@@ -599,11 +629,11 @@ function change_buy_time() {
 
 
             var chPassVal = tr.cells.namedItem('cheque_passed_td').getAttribute('data-val').split(",");
-            document.getElementById('passed_cheque').value  = (chPassVal[i]=='شده') ? 't' : 'f';
-            (chPassVal[i]== 'شده') ? document.getElementById('passed_cheque').checked = true: document.getElementById('passed_cheque').checked = false;
+            document.getElementById('passed_cheque').value  = (chPassVal[i]=='خورده') ? 't' : 'f';
+            (chPassVal[i]== 'خورده') ? document.getElementById('passed_cheque').checked = true: document.getElementById('passed_cheque').checked = false;
             var MPassVal = tr.cells.namedItem('month_passed_td').getAttribute('data-val').split(",");
-            document.getElementById('passed').value  = (MPassVal[i]=='شده') ? 't' : 'f';
-            (MPassVal[i]== 'شده') ? document.getElementById('passed').checked = true : document.getElementById('passed').checked = false;
+            document.getElementById('passed').value  = (MPassVal[i]=='خورده') ? 't' : 'f';
+            (MPassVal[i]== 'خورده') ? document.getElementById('passed').checked = true : document.getElementById('passed').checked = false;
             break;
         }
     }
@@ -628,6 +658,7 @@ function change_user_buy_time(source) {// this is for select inside user table
 }
 
 function show_list(last_name_search,name_search,phone_search,page,sort_col,filter) {
+    var select_for_edit_id = document.getElementById('userTable').getAttribute('data-selectedId');
     $.ajax({
         type: "POST",
         url: "search.php",
@@ -638,7 +669,8 @@ function show_list(last_name_search,name_search,phone_search,page,sort_col,filte
             phone_search: phone_search,
             page: page,
             sort_col: sort_col,
-            filter: filter
+            filter: filter,
+            selectedId: select_for_edit_id
         },
         beforeSend: function() {
 
@@ -828,8 +860,8 @@ function create_ref_row_from_obj(record) {
 
     var x12 = tr.insertCell(12);
     x12.setAttribute("id", "cheque_passed_td");
-    if(record.cheque_passed == 'f') record.cheque_passed = 'نشده';
-    if(record.cheque_passed == 't') record.cheque_passed = 'شده';
+    if(record.cheque_passed == 'f') record.cheque_passed = 'نخورده';
+    if(record.cheque_passed == 't') record.cheque_passed = 'خورده';
     x12.innerHTML = record.cheque_passed;
 
     var x13 = tr.insertCell(13);

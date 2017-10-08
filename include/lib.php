@@ -72,9 +72,14 @@ function send_sms($name, $last_name, $password, $phone)
  * @param $buy_cheque
  * @return mixed
  */
-function calc_score($buy_cash, $buy_2month, $buy_cheque, $referred, $db)
+function calc_score($buy_cash, $buy_2month,$month_passed, $buy_cheque, $referred, $db)
 {
-    $score = calc_cash_score($buy_cash) + calc_2month_score($buy_2month) + calc_cheque_score($buy_cheque);
+    //check if 1 month and 1 day passed after festival start, do not calt 2 month score!!!
+    $festival_start_date = strtotime("October 07");
+    $time_after_festival = floor((time()-$festival_start_date)/(60*60*24));
+    $deadLine_flag = ($time_after_festival > 31) ? false : true;
+
+    $score = calc_cash_score($buy_cash) + calc_2month_score($buy_2month,$month_passed,$deadLine_flag) + calc_cheque_score($buy_cheque);
     if($referred != 'NULL') {
         $refer_score = calc_referred_score($referred, $db);
     }else{
@@ -89,15 +94,18 @@ function calc_score($buy_cash, $buy_2month, $buy_cheque, $referred, $db)
  * @param $buy_cheque
  * @return mixed
  */
-function calc_update_score($buy_cashs, $buy_2months, $buy_cheques, $referred, $db)
+function calc_update_score($buy_cashs, $buy_2months,$month_passeds, $buy_cheques, $referred, $db)
 {
     $buy_cashs = explode(",", $buy_cashs);
     $buy_2months = explode(",", $buy_2months);
     $buy_cheques = explode(",", $buy_cheques);
+    $month_passeds = explode(",", $month_passeds);
 
     $score = 0;
     for($i=0; $i<count($buy_cashs); $i++){
-        $score += calc_cash_score($buy_cashs[$i]) + calc_2month_score($buy_2months[$i]) + calc_cheque_score($buy_cheques[$i]);
+        $score += calc_cash_score($buy_cashs[$i])
+            + calc_2month_score($buy_2months[$i],$month_passeds[$i],true)
+            + calc_cheque_score($buy_cheques[$i]);
     }
 
     if($referred != 'NULL') {
@@ -131,7 +139,7 @@ function calc_referred_score($referred, $db)
             for($i = 0; $i < count($cashs); $i++){
                 if(($i+1) == $single_buy_time){
                     $single_score =  calc_cash_score((int)$cashs[$i]);
-                    $single_score +=  calc_2month_score((int)$months[$i]);
+                    $single_score +=  calc_2month_score((int)$months[$i],'f',true);
                     $single_score +=  calc_cheque_score((int)$cheques[$i]);
                 }
             }
@@ -155,9 +163,9 @@ function calc_cheque_score($buy_cheque)
  * @param $buy_2month
  * @return mixed
  */
-function calc_2month_score($buy_2month)
-{
-    $score = floor($buy_2month / UNIT_OF_PAYMENT) * _2MONTH_SCORE;
+function calc_2month_score($buy_2month,$month_passed,$deadLine_flag)
+{//if deadLine_flag is false, 2 month score is time out
+    $score = ($month_passed == 'f' && $deadLine_flag) ? floor($buy_2month / UNIT_OF_PAYMENT) * _2MONTH_SCORE : 0;
     return $score;
 }
 
@@ -175,7 +183,7 @@ function get_passed($pass_stirng){
     $pass_array = explode(',',$pass_stirng);
     $ret_pass_stirng = '';
     foreach ($pass_array as $pa){
-        $ret_pass = ($pa == 't')? 'شده' : 'نشده';
+        $ret_pass = ($pa == 't')? 'خورده' : 'نخورده';
         $ret_pass_stirng .= ','. $ret_pass;
     }
 
@@ -184,7 +192,7 @@ function get_passed($pass_stirng){
 
 function get_one_passed($pass_stirng,$i){
     $pass_array = explode(',',$pass_stirng);
-    $ret_pass = ($pass_array[$i] == 't')? 'شده' : 'نشده';
+    $ret_pass = ($pass_array[$i] == 't')? 'خورده' : 'نخورده';
 
     return $ret_pass;
 }
@@ -221,7 +229,7 @@ function put_cama_for_money($string){
     return $reverse_string;
 }
 
-function get_users_list($query_result,$row_per_page){
+function get_users_list($query_result,$row_per_page,$selected_id,$page){
     $rows = '';
     $i = 1;
     foreach ($query_result as $key => $value) {
@@ -243,15 +251,19 @@ function get_users_list($query_result,$row_per_page){
 
         $sum = get_sum_buy($cash_arr,$month_arr,$cheque_arr);
 
-        $rows .= "<tr data-id='$id'>";
+        $rows .= "<tr data-id='$id'";
+        if($id == $selected_id) $rows.="class='gray_row'";
+        $rows .= ">";
         $rows .=  "<td scope='row' id='chbxtd'>";
         $rows .=  "<div class='tooltip'>
-                                    <button class='btn-primary' onclick='add_reffered(this)'>انتخاب</button>
+                                    <button class='btn-primary' onclick='add_reffered(this)'";
+        if($id == $selected_id) $rows.="disabled style='cursor:default;'";
+        $rows .= ">انتخاب</button>
                                     <span class='tooltiptext'>اضافه به لیست معرفی ها</span>
                                  </div>";
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='numTd'>";
-        $rows .= $i;
+        $rows .= $i+($page-1)*$row_per_page;
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='nameTd'>";
         $rows .= $value['name'];
@@ -299,7 +311,7 @@ function get_users_list($query_result,$row_per_page){
         $rows .=  "<td scope='row' id='scoreTd'>";
         $rows .= $value['score'];
         $rows .= "</td>";
-        $rows .=  "<td scope='row' id='editTd'  onclick='showInForm(this)'><a>"; //class='username'
+        $rows .=  "<td scope='row' id='editTd'  onclick='make_ready_for_edit(this)'><a>"; //class='username'
         $rows .= 'ویرایش';
         $rows .= "</a></td>";
         $rows .= "<td scope='row' id='delTd'>";

@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_2month_passed = 'f';
     $cheque_passed = 'f';
 
-    $score = calc_score($buy_cash, $buy_2month, $buy_cheque, $referred, $db);
+    $score = calc_score($buy_cash, $buy_2month,$_2month_passed, $buy_cheque, $referred, $db);
     $sql = "INSERT INTO users (`name`, `last_name`, `password`, `referred`, `score`, `phone`, `gender`,
             `birth_date`, `created_at`,buy_cash,buy_2month,buy_cheque,2month_passed,cheque_passed)
             VALUES ('$name','$last_name','$password',  '$referred', $score, '$phone',$gender, 

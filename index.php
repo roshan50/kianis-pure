@@ -38,6 +38,11 @@
               <h2 class="pull-me">افزودن فرد جدید</h2>
 
               <div class="panel">
+
+                  <div class='wrap'>
+                      <div class='content'></div>
+                  </div>
+
                   <div id="message"></div>
                   <div id="loading"><img src="images/loading.gif" /></div>
                   <div class="new-user">
@@ -72,11 +77,11 @@
                                   </div>
 
 
-                                  <link rel="stylesheet" href="js/jalalijscalendar-1.4/skins/aqua/theme.css">
-                                  <script src="js/jalalijscalendar-1.4/jalali.js"></script>
-                                  <script src="js/jalalijscalendar-1.4/calendar.js"></script>
-                                  <script src="js/jalalijscalendar-1.4/calendar-setup.js"></script>
-                                  <script src="js/jalalijscalendar-1.4/lang/calendar-fa.js"></script>
+                                  <link rel="stylesheet" href="js/JalaliJSCalendar/skins/aqua/theme.css">
+                                  <script src="js/JalaliJSCalendar/jalali.js"></script>
+                                  <script src="js/JalaliJSCalendar/calendar.js"></script>
+                                  <script src="js/JalaliJSCalendar/calendar-setup.js"></script>
+                                  <script src="js/JalaliJSCalendar/lang/calendar-fa.js"></script>
 
                                   <div class="form-group">
                                       <label for="birth_date" class="label-custom">تاریخ تولد</label>
@@ -113,8 +118,8 @@
                                   </div>
                                   <div class="form-group">
                                       <div class="pass_chbx_div" >
-                                          <label for="passed" class="label-custom-chbx">پاس شده</label>
-                                          <input type="checkbox" id="passed" class="passed" name="2month_passed"/>
+                                          <label for="passed" class="label-custom-chbx">برگشت خورده</label>
+                                          <input type="checkbox" id="passed" class="passed" name="2month_passed" disabled/>
                                           <label for="passed" class="passed_label">شده</label>
                                       </div>
                                       <label for="buy_2month" class="label-custom label-custom-passed">خرید دو ماهه</label>
@@ -125,8 +130,8 @@
 
                                   <div class="form-group">
                                       <div class="pass_chbx_div" >
-                                          <label for="passed_cheque" class="label-custom-chbx">پاس شده</label>
-                                          <input type="checkbox" id="passed_cheque" class="passed" name="cheque_passed"/>
+                                          <label for="passed_cheque" class="label-custom-chbx">برگشت خورده</label>
+                                          <input type="checkbox" id="passed_cheque" class="passed" name="cheque_passed" disabled/>
                                           <label for="passed_cheque" class="passed_label">شده</label>
                                       </div>
                                       <label for="buy_cheque" class="label-custom label-custom-passed">خرید چکی</label>
@@ -139,10 +144,10 @@
 
                               </div>
                           </div>
-                          <div class="extraBtn">
-                              <a class="btn btn-primary insert"  id="myBtn">افزودن خریدار جهت معرفی</a>
-
-                          </div>
+<!--                          <div class="extraBtn">-->
+<!--                              <a class="btn btn-primary insert"  id="myBtn">افزودن خریدار جهت معرفی</a>-->
+<!---->
+<!--                          </div>-->
 <!--.................................................................................................................-->
                           <div class="refered">
                               <div class="text-uppercase"><h2>خریدار(های) معرفی شده توسط <span id="ref_table_title_get_name_input"></span></h2></div>
@@ -166,9 +171,9 @@
                                       <th>خرید چندم</th>
                                       <th>خرید نقد</th>
                                       <th>خرید دو ماهه</th>
-                                      <th>پاس</th>
+                                      <th>برگشت</th>
                                       <th>خرید چکی</th>
-                                      <th>پاس</th>
+                                      <th>برگشت</th>
                                       <th>جمع</th>
                                       <th>معرفی ها</th>
                                       <th>امتیاز</th>
@@ -323,9 +328,9 @@
                           <th>خرید چندم</th>
                           <th>خرید نقد</th>
                           <th>خرید دو ماهه</th>
-                          <th>پاس</th>
+                          <th>برگشت</th>
                           <th>خرید چکی</th>
-                          <th>پاس</th>
+                          <th>برگشت</th>
                           <th>جمع</th>
                           <th>معرفی ها</th>
                           <th data-col="score">
@@ -343,7 +348,7 @@
                     </thead>
                     <tbody id="results">
                       <?php
-                        echo get_users_list($result,$row_per_page);
+                        echo get_users_list($result,$row_per_page,0,1);
                       ?>
                     </tbody>
                   </table>

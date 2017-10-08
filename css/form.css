@@ -52,9 +52,76 @@
     border: 1px solid #601965;
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
+
+/*for save message...........................*/
+.wrap {
+    position: absolute;
+    overflow: hidden;
+    top: 20%;
+    right: 29%;
+    bottom: 67%;
+    left: 28%;
+    padding: 20px 50px;
+    display: block;
+    border-radius: 173px;
+    transform: translateY(2px);
+    transition: all 600ms;
+    visibility: hidden;
+    z-index: 3;
+    text-align: center;
+    font-size: 30px;
+}
+.wrap .content {
+    opacity: 0;
+    top: 35%;
+}
+.wrap:before {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background-color: #ffffff;
+    content: "";
+    bottom: 10px;
+    left: 50%;
+    top: 95%;
+    color: #fff;
+    border-radius: 50%;
+    -webkit-transition: all 600ms cubic-bezier(0.215, 0.61, 0.355, 1);
+    transition: all 600ms cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.wrap.active {
+    display: block;
+    visibility: visible;
+    box-shadow: 6px 4px 34px silver;
+    transition: all 600ms;
+    transform: translateY(2px);
+    /*transition: all 0.5s;*/
+}
+.wrap.active::before {
+     height: 800px;
+     width: 1040px;
+     top: -50%;
+     /* right: 20%; */
+     /* bottom: 65%; */
+     left: -48%;
+     border-radius: 50%;
+     /* top: 50%; */
+     /* left: 50%; */
+     /* margin-left: -1000px; */
+     /* margin-top: -1000px; */
+     display: block;
+     -webkit-transition: all 600ms cubic-bezier(0.215, 0.61, 0.355, 1);
+     transition: all 600ms cubic-bezier(0.215, 0.61, 0.355, 1);
+ }
+.wrap.active .content {
+    position: relative;
+    z-index: 3;
+    opacity: 1;
+    transition: all 600ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
+}
 /*.............................................*/
 .by-cash{
-    margin-right: 123px;
+    margin-right: 151px;
 }
 .toman-label{
     color: #666;

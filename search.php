@@ -54,7 +54,7 @@ $filter_where = filter_where($_POST['filter']);
 
 $Query = "SELECT * FROM users WHERE deleted_at IS NULL $where $filter_where ORDER BY $sort_col  LIMIT $row_per_page OFFSET $offset";
 $ExecQuery = MySQLi_query($db, $Query);
-$res = get_users_list($ExecQuery,$row_per_page);
+$res = get_users_list($ExecQuery,$row_per_page,$_POST['selectedId'],$page);
 
 // Pagination system
 $sql = "SELECT id FROM users WHERE deleted_at IS NULL $where $filter_where";

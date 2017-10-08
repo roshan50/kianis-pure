@@ -6,11 +6,26 @@ include("include/const.php");
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id = $_POST['id'];
     $name = mysqli_real_escape_string($db, $_POST['name']);
+    if ($name == '') {
+        $message = "نام الزامی است!";
+        echo $message;
+        return;
+    }
     $last_name = mysqli_real_escape_string($db, $_POST['last_name']);
+    if ($last_name == '') {
+        $message = "نام خانوادگی الزامی است!";
+        echo $message;
+        return;
+    }
 //    $password = mysqli_real_escape_string($db, $_POST['password']);
     $referred = return_null_if_empty(mysqli_real_escape_string($db, $_POST['referred']));
     $score = return_null_if_empty(mysqli_real_escape_string($db, $_POST['kian_fest_score']));
     $phone = mysqli_real_escape_string($db, $_POST['phone']);
+    if ($phone == '') {
+        $message = "شماره موبایل الزامی است!";
+        echo $message;
+        return;
+    }
     if (check_update_duplicate($db, 'phone', $phone,$id)) {
         $message = "شماره تلفن تکراریست";
         echo $message;
@@ -40,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_2month_passed = update_inside_string($value['2month_passed'],$selectedBuy,$_2month_passed);
         $cheque_passed  = update_inside_string($value['cheque_passed'],$selectedBuy,$cheque_passed);
 
-        $score = calc_update_score($buy_cash, $buy_2month, $buy_cheque, $referred, $db);
+        $score = calc_update_score($buy_cash, $buy_2month,$_2month_passed, $buy_cheque, $referred, $db);
     }
 
 
