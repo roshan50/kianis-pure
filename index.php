@@ -104,7 +104,7 @@
                                   <div class="form-group buyselection">
                                       <label for="gender" class="label-custom-select">خرید چندم </label>
                                       <div id="buyselection">
-                                          <select id="buyTime" name="selectedBuy"></select>
+                                          <select id="buyTime" name="selectedBuy" onchange="change_buy_time(this)"></select>
                                       </div>
                                   </div>
                                   <a id="newBuy" onclick="new_buy()">خرید جدید</a>

@@ -433,12 +433,11 @@ function generate_password() {
 // this is for edit............................................................................
 function make_ready_for_edit(source) {
     var tr = source.parentNode;
-
+    remove_gray_bg_from_user_list();
     make_appearance_ready_for_edit(tr);
     //load input forms.................
     show_in_form(tr);
     // load referred table.............
-    remove_gray_bg_from_user_list();
     load_ref_table(tr);
     // create buy time select..........
     var id = tr.getAttribute('data-id');
@@ -489,7 +488,7 @@ function show_in_form(tr){
     document.getElementById('passed').value  = (MPassVal=='خورده') ? 't' : 'f';
     if(MPassVal== 'خورده') document.getElementById('passed').checked = true;
 }
-document.getElementById("buyTime").addEventListener("change", change_buy_time);
+
 
 function remove_gray_bg_from_user_list() {
     var table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
@@ -613,13 +612,13 @@ function update_user_table_row(id,newCash,newMonth,newCheque,newPass,newCpass) {
     }
 }
 // this is for edit form time of buy....................
-function change_buy_time() {
-    var i = this.value - 1;
-    var id = $(this).data('id');
+function change_buy_time(source) {
+    var i = source.value - 1;
+    var id = source.getAttribute('data-id');
     var table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
     for(var j=0; j<table.rows.length; j++){
         var tr = table.rows[j];
-        if($(tr).data('id') == id){
+        if(tr.getAttribute('data-id') == id){
             var cash = tr.cells.namedItem('buy_cash_td').getAttribute('data-val').split(",");
             document.getElementById('buy_cash').value  = cash[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             var month = tr.cells.namedItem('buy_2month_td').getAttribute('data-val').split(",");
