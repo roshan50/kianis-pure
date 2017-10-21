@@ -39,7 +39,11 @@ $(document).ready(function() {
 
     // new user ajax form......................
     $('#user-form').submit(function(event) {
-        var referrd = get_referred(); //alert(referrd);
+        var referrd = get_referred();
+        var chequesInfo = get_cheques();
+        cheques = chequesInfo[0].replace(/,/g, "");
+        cheques_date = chequesInfo[2].replace(/,/g, "");
+        cheques_pass = chequesInfo[1].replace(/,/g, "");
 
         remove_camas();
 
@@ -50,7 +54,7 @@ $(document).ready(function() {
             $.ajax({
                 type: 'post',
                 url: 'userCreate.php',
-                data: $('#user-form').serialize()+'&'+$.param({ 'password': password, 'referred': referrd }),
+                data: $('#user-form').serialize()+'&'+$.param({ 'password': password, 'referred': referrd , 'buy_cheque': cheques,'cheque_passed':cheques_pass , 'buy_date':cheques_date}),
                 beforeSend: function() {
                     $("#loading").css("display","block");
                 },
@@ -188,6 +192,22 @@ $(document).ready(function() {
 
 });
 //**********************************************************************************************************************
+function get_cheques() {
+    var table_cheque = document.getElementById('cheques_table').getElementsByTagName('tbody')[0];
+    var len = table_cheque.rows.length;
+    var cheque = '';
+    var cheque_passed = '';
+    var cheque_date = '';
+
+    for (var i = 0; i < len ; i++) {
+        var row = table_cheque.rows[i];
+        cheque += row.cells.namedItem('chequeTd').innerText+'-';
+        cheque_passed += row.cells.namedItem('passTd').innerText+'-';
+        cheque_date += row.cells.namedItem('chequeDateTd').innerText+'-';
+    }
+    var table = [cheque.replace(/-$/, ''),cheque_passed.replace(/-$/, ''),cheque_date.replace(/-$/, '')];
+    return table;
+}
 function show_save_message(msg) {
     $('.wrap').addClass('active');
     $('.content').text(msg);
@@ -341,6 +361,11 @@ function add_reffered(source) {
     });
 }
 
+function delete_row(table_id,tr) {
+    var table = document.getElementById(table_id).getElementsByTagName('tbody')[0];
+    table.removeChild(tr);
+}
+
 function delete_record(source) {
     var tableRef = document.getElementById('ref_table').getElementsByTagName('tbody')[0];
     var row = source.parentNode.parentNode;
@@ -442,6 +467,7 @@ function make_ready_for_edit(source) {
     // create buy time select..........
     var id = tr.getAttribute('data-id');
     create_buy_time_part_for_edit(tr,id);
+    load_cheque_table(tr);
     // this is for keep editable row after paging
     document.getElementById('userTable').setAttribute('data-selectedId', id);
 }
@@ -473,22 +499,17 @@ function show_in_form(tr){
     document.getElementById('birth_date').value  = tr.cells.namedItem('birthTd').innerText;
     var cash = tr.cells.namedItem('buy_cash_td').innerText;// string to array
     document.getElementById('buy_cash').value  = cash;
-    var month = tr.cells.namedItem('buy_2month_td').innerText;
-    document.getElementById('buy_2month').value  = month;
     var cheque = tr.cells.namedItem('buy_cheque_td').innerText;
     document.getElementById('buy_cheque').value  = cheque;
 
-    if(month != '0') document.getElementById('passed').disabled = false;
+    // if(month != '0') document.getElementById('passed').disabled = false;
     if(cheque != '0') document.getElementById('passed_cheque').disabled = false;
 
     var chPassVal = tr.cells.namedItem('cheque_passed_td').innerText;
     document.getElementById('passed_cheque').value  = (chPassVal=='خورده') ? 't' : 'f';
     if(chPassVal== 'خورده') document.getElementById('passed_cheque').checked = true;
-    var MPassVal = tr.cells.namedItem('month_passed_td').innerText;
-    document.getElementById('passed').value  = (MPassVal=='خورده') ? 't' : 'f';
-    if(MPassVal== 'خورده') document.getElementById('passed').checked = true;
-}
 
+}
 
 function remove_gray_bg_from_user_list() {
     var table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
@@ -536,10 +557,45 @@ function create_buy_time_part_for_edit(tr,id) {
     document.getElementById('newBuy').style.display = 'block';
     document.getElementById('save_new_buy').setAttribute('data-id', id);
 }
+
+function load_cheque_table(tr) {
+    var cheque_table = document.getElementById('cheques_table').getElementsByTagName('tbody')[0];
+    var length = cheque_table.rows.length;
+    for(var i=0; i<length; i++){
+
+    }
+}
 //********************************************************************************************************
+function add_buy_to_grid() {
+    var pass = document.getElementById('passed_cheque').checked? 't' : 'f';
+    document.getElementById('passed_cheque').checked = false;
+    var amount = document.getElementById('buy_cheque').value;
+    document.getElementById('buy_cheque').value = '';
+    var date = document.getElementById('buy_date').value;
+    document.getElementById('buy_date').value = '';
+
+    var tr = document.createElement("TR");
+
+    var x0 = tr.insertCell(0);
+    x0.setAttribute("id", "passTd");
+    x0.innerHTML = pass;
+
+    var x1 = tr.insertCell(1);
+    x1.setAttribute("id", "chequeTd");
+    x1.innerHTML = amount;
+
+    var x2 = tr.insertCell(2);
+    x2.setAttribute("id", "chequeDateTd");
+    x2.innerHTML = date;
+
+    var x3 = tr.insertCell(3);
+    x3.innerHTML = '<img src="images/remove.png" class="delete" onclick="delete_row(\'cheques_table\',this.parentNode.parentNode)"/>';
+
+    var table = document.getElementById('cheques_table').getElementsByTagName('tbody')[0];
+    table.appendChild(tr);
+}
 function new_buy() {
     document.getElementById('buy_cash').value  = '';
-    document.getElementById('buy_2month').value  = '';
     document.getElementById('buy_cheque').value  = '';
     //...........................................
     var optCount = document.getElementById("buyTime").length;
@@ -621,18 +677,13 @@ function change_buy_time(source) {
         if(tr.getAttribute('data-id') == id){
             var cash = tr.cells.namedItem('buy_cash_td').getAttribute('data-val').split(",");
             document.getElementById('buy_cash').value  = cash[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            var month = tr.cells.namedItem('buy_2month_td').getAttribute('data-val').split(",");
-            document.getElementById('buy_2month').value  = month[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
             var cheque = tr.cells.namedItem('buy_cheque_td').getAttribute('data-val').split(",");
             document.getElementById('buy_cheque').value  = cheque[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
 
             var chPassVal = tr.cells.namedItem('cheque_passed_td').getAttribute('data-val').split(",");
             document.getElementById('passed_cheque').value  = (chPassVal[i]=='خورده') ? 't' : 'f';
             (chPassVal[i]== 'خورده') ? document.getElementById('passed_cheque').checked = true: document.getElementById('passed_cheque').checked = false;
-            var MPassVal = tr.cells.namedItem('month_passed_td').getAttribute('data-val').split(",");
-            document.getElementById('passed').value  = (MPassVal[i]=='خورده') ? 't' : 'f';
-            (MPassVal[i]== 'خورده') ? document.getElementById('passed').checked = true : document.getElementById('passed').checked = false;
             break;
         }
     }
@@ -643,17 +694,18 @@ function change_user_buy_time(source) {// this is for select inside user table
     var tr = source.parentNode.parentNode.parentNode;
 
     var cash = tr.cells.namedItem('buy_cash_td').getAttribute('data-val').split(",");
-    var month = tr.cells.namedItem('buy_2month_td').getAttribute('data-val').split(",");
-    var cheque = tr.cells.namedItem('buy_cheque_td').getAttribute('data-val').split(",");
-    var chPassVal = tr.cells.namedItem('cheque_passed_td').getAttribute('data-val').split(",");
-    var MPassVal = tr.cells.namedItem('month_passed_td').getAttribute('data-val').split(",");
+    var cheques = tr.cells.namedItem('buy_cheque_td').getAttribute('data-val').split(",");
+    var chPassVals = tr.cells.namedItem('cheque_passed_td').getAttribute('data-val').split(",");
+    var chdates = tr.cells.namedItem('buy_date_td').getAttribute('data-val').split(",");
+
+    var cheque = cheques[i].split("-");
+    var chPassVal = chPassVals[i].split("-");
+    var chdate = chdates[i].split("-");
 
     tr.cells.namedItem('buy_cash_td').innerText = cash[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    tr.cells.namedItem('buy_2month_td').innerText  = month[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    tr.cells.namedItem('buy_cheque_td').innerText  = cheque[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    tr.cells.namedItem('cheque_passed_td').innerText  = chPassVal[i];
-    tr.cells.namedItem('month_passed_td').innerText  = MPassVal[i];
-
+    tr.cells.namedItem('buy_cheque_td').innerText  = cheque[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    tr.cells.namedItem('cheque_passed_td').innerText  = chPassVal[0];
+    tr.cells.namedItem('buy_date_td').innerText  = chdate[0];
 }
 
 function show_list(last_name_search,name_search,phone_search,page,sort_col,filter) {
@@ -718,14 +770,14 @@ function refresh_form() {
     document.getElementById('mobile').value  = '';
     document.getElementById('birth_date').value  = '';
     document.getElementById('buy_cash').value  = '';
-    document.getElementById('buy_2month').value  = '';
     document.getElementById('buy_cheque').value  = '';
     document.getElementById('gender').value  = 0;
-    document.getElementById('passed').checked = false;
     document.getElementById('passed_cheque').checked = false;
 
     document.getElementById("save_new_buy").style.display = 'none';
     document.getElementsByClassName('buying')[0].style.display = 'none';
+
+    document.getElementById('cheques_table').getElementsByTagName('tbody')[0].innerHTML='';
 
     ref_table_array = [];
     ref_table_array_rows_page = [];
@@ -878,6 +930,24 @@ function create_ref_row_from_obj(record) {
     return tr;
 }
 
+function change_cheque_buy(source) {
+    var tr = source.parentNode.parentNode.parentNode;
+    var i = tr.cells.namedItem('select_td').firstElementChild.firstElementChild.value - 1;
+    var j = source.value - 1;
+
+    var cheques = tr.cells.namedItem('buy_cheque_td').getAttribute('data-val').split(",");
+    var chPassVals = tr.cells.namedItem('cheque_passed_td').getAttribute('data-val').split(",");
+    var chequeDates = tr.cells.namedItem('buy_date_td').getAttribute('data-val').split(",");
+
+    var cheque = cheques[i].split("-");
+    var chPassVal = chPassVals[i].split("-");
+    var chequeDate = chequeDates[i].split("-");
+
+    tr.cells.namedItem('buy_date_td').innerText = chequeDate[j];
+    tr.cells.namedItem('buy_cheque_td').innerText  = cheque[j].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    tr.cells.namedItem('cheque_passed_td').innerText  = chPassVal[j];
+}
+
 function put_ref_tr_in_obj(clone_tr,id) {
     var record = {
         name : clone_tr.cells.namedItem('nameTd').innerText,
@@ -887,8 +957,6 @@ function put_ref_tr_in_obj(clone_tr,id) {
         birth_date: clone_tr.cells.namedItem('birthTd').innerText,
         buy_time:'',
         buy_cash: clone_tr.cells.namedItem('buy_cash_td').innerText,
-        buy_2month: clone_tr.cells.namedItem('buy_2month_td').innerText,
-        /*2month_passed:'',*/
         buy_cheque: clone_tr.cells.namedItem('buy_cheque_td').innerText,
         cheque_passed: clone_tr.cells.namedItem('cheque_passed_td').innerText,
         referred: clone_tr.cells.namedItem('referredTd').innerText,

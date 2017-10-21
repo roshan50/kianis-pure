@@ -114,30 +114,42 @@
                                   <div class="form-group by-cash">
                                       <label for="buy_cash" class="label-custom">خرید نقدی</label>
                                       <input id="buy_cash" type="text" name="buy_cash" class="money" pattern="[0-9,]*" onkeypress="just_number(event)">
-                                      <label class="toman-label">تومان</label>
-                                  </div>
-                                  <div class="form-group">
-                                      <div class="pass_chbx_div" >
-                                          <label for="passed" class="label-custom-chbx">برگشت خورده</label>
-                                          <input type="checkbox" id="passed" class="passed" name="2month_passed" disabled/>
-                                          <label for="passed" class="passed_label">شده</label>
-                                      </div>
-                                      <label for="buy_2month" class="label-custom label-custom-passed">خرید دو ماهه</label>
-                                      <input id="buy_2month" type="text" name="buy_2month" class="money"  pattern="[0-9,]*" onkeypress="just_number(event)">
-                                      <label class="toman-label">تومان</label>
+                                      <label class="toman-label">ریال</label>
                                   </div>
 
 
                                   <div class="form-group">
                                       <div class="pass_chbx_div" >
                                           <label for="passed_cheque" class="label-custom-chbx">برگشت خورده</label>
-                                          <input type="checkbox" id="passed_cheque" class="passed" name="cheque_passed" disabled/>
-                                          <label for="passed_cheque" class="passed_label">شده</label>
+                                          <input type="checkbox" id="passed_cheque" class="passed" disabled/>
+                                          <label for="passed_cheque" class="passed_label"></label>
                                       </div>
                                       <label for="buy_cheque" class="label-custom label-custom-passed">خرید چکی</label>
-                                      <input id="buy_cheque" type="text" name="buy_cheque" class="money"  pattern="[0-9,]*"  onkeypress="just_number(event)">
-                                      <label class="toman-label">تومان</label>
+                                      <input id="buy_cheque" type="text"  class="money"  pattern="[0-9,]*"  onkeypress="just_number(event)">
+                                      <label class="toman-label">ریال</label>
                                   </div>
+
+                                  <div class="form-group">
+                                      <label for="buy_date" class="label-custom">تاریخ چک</label>
+                                      <input id="buy_date" type="text">
+                                  </div>
+                                  
+                                  <img src="images/add.png" class="add_cheque_btn" onclick="add_buy_to_grid()"/>
+                                  <div id="cheques-div">
+                                      <table id="cheques_table">
+                                          <thead>
+                                            <tr>
+                                                <th>برگشت</th>
+                                                <th>خرید چکی</th>
+                                                <th>تاریخ چک</th>
+                                                <th>حذف</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+
+                                          </tbody>
+                                      </table>
+                                 </div>
 
 
                                   <a id="save_new_buy" class="insert btn btn-primary" onclick="save_new_buy(this)">ثبت خرید جدید</a>
@@ -327,9 +339,9 @@
                           <th>تاریخ تولد</th>
                           <th>خرید چندم</th>
                           <th>خرید نقد</th>
-                          <th>خرید دو ماهه</th>
-                          <th>برگشت</th>
+                          <th>چک چندم</th>
                           <th>خرید چکی</th>
+                          <th>تاریخ چک</th>
                           <th>برگشت</th>
                           <th>جمع</th>
                           <th>معرفی ها</th>

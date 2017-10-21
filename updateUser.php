@@ -41,18 +41,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $selectedBuy = mysqli_real_escape_string($db, $_POST['selectedBuy'])-1;
     $birth_date = return_null_if_empty(mysqli_real_escape_string($db, $_POST['birth_date']));
     $buy_cash = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_cash']));
-    $buy_2month = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_2month']));
+//    $buy_2month = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_2month']));
     $buy_cheque = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_cheque']));
-    $_2month_passed = isset($_POST['2month_passed']) ? 't' : 'f';
+//    $_2month_passed = isset($_POST['2month_passed']) ? 't' : 'f';
     $cheque_passed = isset($_POST['cheque_passed']) ? 't' : 'f';
 
     $select = "SELECT buy_cash, buy_2month, buy_cheque,2month_passed,cheque_passed FROM users WHERE id = $id";
     $result = mysqli_query($db, $select);
     foreach ($result as $key => $value) {
         $buy_cash   = update_inside_string($value['buy_cash'],$selectedBuy,$buy_cash);
-        $buy_2month = update_inside_string($value['buy_2month'],$selectedBuy,$buy_2month);
+//        $buy_2month = update_inside_string($value['buy_2month'],$selectedBuy,$buy_2month);
         $buy_cheque = update_inside_string($value['buy_cheque'],$selectedBuy,$buy_cheque);
-        $_2month_passed = update_inside_string($value['2month_passed'],$selectedBuy,$_2month_passed);
+//        $_2month_passed = update_inside_string($value['2month_passed'],$selectedBuy,$_2month_passed);
         $cheque_passed  = update_inside_string($value['cheque_passed'],$selectedBuy,$cheque_passed);
 
         $score = calc_update_score($buy_cash, $buy_2month,$_2month_passed, $buy_cheque, $referred, $db);
@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
     $sql = "UPDATE users SET `name`='$name' , `last_name`= '$last_name', `referred` = '$referred', `score` = $score, `phone` = '$phone', `gender`=$gender,
-            `birth_date`='$birth_date',buy_cash = '$buy_cash',buy_2month = '$buy_2month',buy_cheque = '$buy_cheque',2month_passed='$_2month_passed',cheque_passed = '$cheque_passed' WHERE id = $id";
+            `birth_date`='$birth_date',buy_cash = '$buy_cash',buy_cheque = '$buy_cheque',cheque_passed = '$cheque_passed' WHERE id = $id";
 
     if ($db->query($sql) === TRUE) {
         $message = $last_name . " با موفقیت تغییر یافت.";

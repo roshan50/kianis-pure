@@ -38,16 +38,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $gender = mysqli_real_escape_string($db, $_POST['gender']);
     $birth_date = mysqli_real_escape_string($db, $_POST['birth_date'])?mysqli_real_escape_string($db, $_POST['birth_date']):'0000-00-00';
     $buy_cash = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_cash']));
-    $buy_2month = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_2month']));
+//    $buy_2month = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_2month']));
     $buy_cheque = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_cheque']));
-    $_2month_passed = 'f';
-    $cheque_passed = 'f';
+    $buy_date = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['buy_date']));
+    $cheque_passed = return_zero_if_empty(mysqli_real_escape_string($db, $_POST['cheque_passed']));
 
-    $score = calc_score($buy_cash, $buy_2month,$_2month_passed, $buy_cheque, $referred, $db);
+    $score = 0;//calc_score($buy_cash, $buy_cheque, $referred, $db);
     $sql = "INSERT INTO users (`name`, `last_name`, `password`, `referred`, `score`, `phone`, `gender`,
-            `birth_date`, `created_at`,buy_cash,buy_2month,buy_cheque,2month_passed,cheque_passed)
+            `birth_date`, `created_at`,buy_cash,buy_cheque,cheque_passed,buy_date)
             VALUES ('$name','$last_name','$password',  '$referred', $score, '$phone',$gender, 
-            '$birth_date', NOW(),'$buy_cash','$buy_2month','$buy_cheque','$_2month_passed','$cheque_passed')";
+            '$birth_date', NOW(),'$buy_cash','$buy_cheque','$cheque_passed','$buy_date')";
 
     if ($db->query($sql) === TRUE) {
         $message = $last_name . " با موفقیت اضافه شد.";

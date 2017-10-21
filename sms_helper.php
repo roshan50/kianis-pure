@@ -37,9 +37,9 @@ class SmsIR_SendMessage {
      * @return void
      */
     public function __construct($APIKey,$SecretKey,$LineNumber){
-        $this->APIKey = $APIKey;
-        $this->SecretKey = $SecretKey;
-        $this->LineNumber = $LineNumber;
+//        $this->APIKey = $APIKey;
+//        $this->SecretKey = $SecretKey;
+//        $this->LineNumber = $LineNumber;
     }
 
     /**
@@ -52,34 +52,61 @@ class SmsIR_SendMessage {
      */
     public function SendMessage($MobileNumbers, $Messages, $SendDateTime = '') {
 
-        $token = $this->GetToken($this->APIKey, $this->SecretKey);
-        if($token != false){
-            $postData = array(
-                'Messages' => $Messages,
-                'MobileNumbers' => $MobileNumbers,
-                'LineNumber' => $this->LineNumber,
-                'SendDateTime' => $SendDateTime,
-                'CanContinueInCaseOfError' => 'false'
-            );
 
-            $url = $this->getAPIMessageSendUrl();
-            $SendMessage = $this->execute($postData, $url, $token);
-            $object = json_decode($SendMessage);
-            if(is_object($object)){
-                $array = get_object_vars($object);
-                if(is_array($array)){
-                    $result = $array['Message'];
-                } else {
-                    $result = false;
-                }
-            } else {
-                $result = false;
-            }
+        $url = "37.130.202.188/services.jspd";
 
-        } else {
-            $result = false;
-        }
-        return $result;
+        $rcpt_nm = array($MobileNumbers);
+        $param = array
+        (
+            'uname'=>'lemon',
+            'pass'=>'8535343',
+            'from'=>'+98100020400',
+            'message'=>$Messages,
+            'to'=>json_encode($rcpt_nm),
+            'op'=>'send'
+        );
+
+        $handler = curl_init($url);
+        curl_setopt($handler, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($handler, CURLOPT_POSTFIELDS, $param);
+        curl_setopt($handler, CURLOPT_RETURNTRANSFER, true);
+        $response2 = curl_exec($handler);
+
+        $response2 = json_decode($response2);
+        $res_code = $response2[0];
+        $res_data = $response2[1];
+
+
+        return $res_data;
+
+//        $token = $this->GetToken($this->APIKey, $this->SecretKey);
+//        if($token != false){
+//            $postData = array(
+//                'Messages' => $Messages,
+//                'MobileNumbers' => $MobileNumbers,
+//                'LineNumber' => $this->LineNumber,
+//                'SendDateTime' => $SendDateTime,
+//                'CanContinueInCaseOfError' => 'false'
+//            );
+//
+//            $url = $this->getAPIMessageSendUrl();
+//            $SendMessage = $this->execute($postData, $url, $token);
+//            $object = json_decode($SendMessage);
+//            if(is_object($object)){
+//                $array = get_object_vars($object);
+//                if(is_array($array)){
+//                    $result = $array['Message'];
+//                } else {
+//                    $result = false;
+//                }
+//            } else {
+//                $result = false;
+//            }
+//
+//        } else {
+//            $result = false;
+//        }
+//        return $result;
     }
 
     /**

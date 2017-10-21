@@ -35,35 +35,35 @@ function check_update_duplicate($db, $column_name, $column_value,$id)
 
 function send_sms($name, $last_name, $password, $phone)
 {
-    require 'sms_helper.php';
+    $apkURL = "http://kianis.ir/kianiss.apk";
+    $apkURL_Msg = " لینک دانلود نرم افزار: " . $apkURL;
+    $sms_content = "کاربر گرامی $name $last_name ، حساب کاربری شما با نام کاربری: '$phone' و رمز عبور: '$password' ایجاد شد. $apkURL_Msg";
 
-    try {
-        date_default_timezone_set("Asia/Tehran");
+    $url = "37.130.202.188/services.jspd";
 
-        // your sms.ir panel configuration
-        $APIKey = "685fd62b729f33e226e7a7a2";
-        $SecretKey = "smjmn";
-        $LineNumber = "10000038700241";
+    $rcpt_nm = array($phone);
+    $param = array
+    (
+        'uname'=>'lemon',
+        'pass'=>'8535343',
+        'from'=>'+98100020400',
+        'message'=>$sms_content,
+        'to'=>json_encode($rcpt_nm),
+        'op'=>'send'
+    );
 
-        // your mobile numbers
-        $MobileNumbers = array($phone);
+    $handler = curl_init($url);
+    curl_setopt($handler, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($handler, CURLOPT_POSTFIELDS, $param);
+    curl_setopt($handler, CURLOPT_RETURNTRANSFER, true);
+    $response2 = curl_exec($handler);
 
-        $sms_content = "کاربر گرامی $name $last_name ، حساب کاربری شما با نام کاربری: '$phone' و رمز عبور: '$password' ایجاد شد.";
+    $response2 = json_decode($response2);
+    $res_code = $response2[0];
+    $res_data = $response2[1];
 
-//        $sms_content = "کاربر گرامی " . $name . ' ، حساب کاربری شما با نام کاربری: "' . $phone . '" و رمز عبور: "' . $password . '" ایجاد شد';
-        // your text messages
-        $Messages = array($sms_content);
 
-        // sending date
-        @$SendDateTime = date("Y-m-d") . "T" . date("H:i:s");
-
-        $SmsIR_SendMessage = new SmsIR_SendMessage($APIKey, $SecretKey, $LineNumber);
-        $SendMessage = $SmsIR_SendMessage->SendMessage($MobileNumbers, $Messages, $SendDateTime);
-//        var_dump($SendMessage);
-
-    } catch (Exeption $e) {
-        echo 'Error SendMessage : ' . $e->getMessage();
-    }
+    return $res_data;
 }
 //..............................................................................................
 /**
@@ -79,7 +79,7 @@ function calc_score($buy_cash, $buy_2month,$month_passed, $buy_cheque, $referred
     $time_after_festival = floor((time()-$festival_start_date)/(60*60*24));
     $deadLine_flag = ($time_after_festival > 31) ? false : true;
 
-    $score = calc_cash_score($buy_cash) + calc_2month_score($buy_2month,$month_passed,$deadLine_flag) + calc_cheque_score($buy_cheque);
+    $score = calc_cash_score($buy_cash) + calc_cheque_score($buy_cheque);
     if($referred != 'NULL') {
         $refer_score = calc_referred_score($referred, $db);
     }else{
@@ -97,14 +97,14 @@ function calc_score($buy_cash, $buy_2month,$month_passed, $buy_cheque, $referred
 function calc_update_score($buy_cashs, $buy_2months,$month_passeds, $buy_cheques, $referred, $db)
 {
     $buy_cashs = explode(",", $buy_cashs);
-    $buy_2months = explode(",", $buy_2months);
+//    $buy_2months = explode(",", $buy_2months);
     $buy_cheques = explode(",", $buy_cheques);
     $month_passeds = explode(",", $month_passeds);
 
     $score = 0;
     for($i=0; $i<count($buy_cashs); $i++){
         $score += calc_cash_score($buy_cashs[$i])
-            + calc_2month_score($buy_2months[$i],$month_passeds[$i],true)
+//            + calc_2month_score($buy_2months[$i],$month_passeds[$i],true)
             + calc_cheque_score($buy_cheques[$i]);
     }
 
@@ -129,18 +129,18 @@ function calc_referred_score($referred, $db)
         $single_id = substr($single_referred,1,strpos($single_referred, '-')-1);
         $single_buy_time =  substr($single_referred,strpos($single_referred, '-')+1,(strpos($single_referred, '}')-strpos($single_referred, '-')-1));
 //        echo $single_buy_time;
-        $sql = "SELECT buy_cash, buy_2month, buy_cheque FROM users WHERE id = $single_id";
+        $sql = "SELECT buy_cash, buy_cheque FROM users WHERE id = $single_id";
         $result = mysqli_query($db, $sql);
         foreach ($result as $key => $value) {
             $cashs   = explode(',',$value['buy_cash']);
-            $months  = explode(',',$value['buy_2month']);
+//            $months  = explode(',',$value['buy_2month']);
             $cheques = explode(',',$value['buy_cheque']);
 
             for($i = 0; $i < count($cashs); $i++){
                 if(($i+1) == $single_buy_time){
                     $single_score =  calc_cash_score((int)$cashs[$i]);
-                    $single_score +=  calc_2month_score((int)$months[$i],'f',true);
-                    $single_score +=  calc_cheque_score((int)$cheques[$i]);
+//                    $single_score +=  calc_cash_score((int)$months[$i]);
+                    $single_score +=  calc_cash_score((int)$cheques[$i]);
                 }
             }
         }
@@ -163,11 +163,11 @@ function calc_cheque_score($buy_cheque)
  * @param $buy_2month
  * @return mixed
  */
-function calc_2month_score($buy_2month,$month_passed,$deadLine_flag)
-{//if deadLine_flag is false, 2 month score is time out
-    $score = ($month_passed == 'f' && $deadLine_flag) ? floor($buy_2month / UNIT_OF_PAYMENT) * _2MONTH_SCORE : 0;
-    return $score;
-}
+//function calc_2month_score($buy_2month,$month_passed,$deadLine_flag)
+//{//if deadLine_flag is false, 2 month score is time out
+//    $score = ($month_passed == 'f' && $deadLine_flag) ? floor($buy_2month / UNIT_OF_PAYMENT) * _2MONTH_SCORE : 0;
+//    return $score;
+//}
 
 /**
  * @param $buy_cash
@@ -180,27 +180,24 @@ function calc_cash_score($buy_cash)
 }
 //......................................................................................................................
 function get_passed($pass_stirng){
-    $pass_array = explode(',',$pass_stirng);
-    $ret_pass_stirng = '';
-    foreach ($pass_array as $pa){
-        $ret_pass = ($pa == 't')? 'خورده' : 'نخورده';
-        $ret_pass_stirng .= ','. $ret_pass;
-    }
+    $pass_stirng = str_replace("f","نخورده",$pass_stirng);
+    $pass_stirng = str_replace("t","خورده",$pass_stirng);
 
-    return trim($ret_pass_stirng,',');
+    return $pass_stirng;
 }
 
-function get_one_passed($pass_stirng,$i){
+function get_one_passed($pass_stirng,$i,$j){
     $pass_array = explode(',',$pass_stirng);
-    $ret_pass = ($pass_array[$i] == 't')? 'خورده' : 'نخورده';
+    $pass_array = explode('-',$pass_array[$i]);
+    $ret_pass = ($pass_array[$j] == 't')? 'خورده' : 'نخورده';
 
     return $ret_pass;
 }
 
-function get_sum_buy($cash_arr,$month_arr,$cheque_arr){
+function get_sum_buy($cash_arr,$cheque_arr){
     $sum = 0;
     for($i = 0; $i < count($cash_arr); $i++){
-        $sum += (int)$cash_arr[$i] + (int)$month_arr[$i] + (int)$cheque_arr[$i];
+        $sum += (int)$cash_arr[$i] + (int)$cheque_arr[$i];
     }
     return $sum;
 }
@@ -237,19 +234,26 @@ function get_users_list($query_result,$row_per_page,$selected_id,$page){
         $gender = ($value['gender']==0) ? 'مرد' : 'زن';
 
         $cash = $value['buy_cash'];
-        $month = $value['buy_2month'];
         $cheque = $value['buy_cheque'];
+        $buy_date = $value['buy_date'];
+
+
 
         $cash_arr = explode(',',$cash);
-        $len = (($cash=='0' && $month=='0' && $cheque=='0') || (!$cash && !$month && !$cheque)) ? 0 : count($cash_arr);
-        $month_arr = explode(',',$month);
-        $month_passed = $value['2month_passed'];
-        $mpv = get_passed($month_passed);
+        $len = (($cash=='0' && $cheque=='0') || (!$cash && !$cheque)) ? 0 : count($cash_arr);
+
+
         $cheque_arr = explode(',',$cheque);
+        $cheque_arr2 = explode('-',$cheque_arr[0]);
+        $buy_date_arr = explode(',',$buy_date);
+        $cheque_date_arr2 = explode('-',$buy_date_arr[0]);
+        $chequelen = (($cheque=='0') || (!$cheque)) ? 0 : count($cheque_arr2);
+
+
         $cheque_passed = $value['cheque_passed'];
         $cpv = get_passed($cheque_passed);
 
-        $sum = get_sum_buy($cash_arr,$month_arr,$cheque_arr);
+        $sum = get_sum_buy($cash_arr,$cheque_arr);
 
         $rows .= "<tr data-id='$id'";
         if($id == $selected_id) $rows.="class='gray_row'";
@@ -280,6 +284,7 @@ function get_users_list($query_result,$row_per_page,$selected_id,$page){
         $rows .=  "<td scope='row' id='birthTd'>";
         $rows .= $value['birth_date'];
         $rows .= "</td>";
+
         $rows .=  "<td scope='row' id='select_td'>";
         $rows .= "<div id='buyselectionUserTd'>
                  <select id='buyTimeUserTd' onchange='change_user_buy_time(this)'>";
@@ -288,19 +293,24 @@ function get_users_list($query_result,$row_per_page,$selected_id,$page){
         }
         $rows .= "</select></div></td>";
         $rows .=  "<td scope='row' id='buy_cash_td' data-val='$cash'>";
-        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :number_format((int)$cash_arr[0]);
+        $rows .= ($cash=='0' && $cheque=='0')? '' :number_format((int)$cash_arr[0]);
         $rows .= "</td>";
-        $rows .=  "<td scope='row' id='buy_2month_td' data-val='$month'>";
-        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :number_format((int)$month_arr[0]);
-        $rows .= "</td>";
-        $rows .=  "<td scope='row' id='month_passed_td' data-val='$mpv'>";
-        $rows .= get_one_passed($month_passed,0);
-        $rows .= "</td>";
+
+        $rows .=  "<td scope='row' id='cheque_select_td'>";
+        $rows .= "<div id='chequeselectionUserTd'>
+                 <select id='chequeTimeUserTd' onchange='change_cheque_buy(this)'>";
+        for($j=1; $j<=$chequelen; $j++){
+            $rows .= "<option value='$j'>$j</option>";
+        }
+        $rows .= "</select></div></td>";
         $rows .=  "<td scope='row' id='buy_cheque_td' data-val='$cheque'>";
-        $rows .= ($cash=='0' && $month=='0' && $cheque=='0')? '' :number_format((int)$cheque_arr[0]);
+        $rows .= ($cash=='0' && $cheque=='0')? '' :number_format((int)$cheque_arr2[0]);
+        $rows .= "</td>";
+        $rows .=  "<td scope='row' id='buy_date_td' data-val='$buy_date'>";
+        $rows .= $cheque_date_arr2[0];
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='cheque_passed_td' data-val='$cpv'>";
-        $rows .= get_one_passed($cheque_passed,0);
+        $rows .= get_one_passed($cheque_passed,0,0);
         $rows .= "</td>";
         $rows .=  "<td scope='row' id='sumTd'>";
         $rows .= number_format($sum);//put_cama_for_money($sum);

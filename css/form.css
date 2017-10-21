@@ -53,6 +53,20 @@
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+.add_cheque_btn{
+    width: 20px;
+    cursor: pointer;
+}
+.add_cheque_btn:hover{
+    /*border: 1px solid #ccc;*/
+    /*box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);*/
+}
+.add_cheque_btn tbody{
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100px;
+}
+
 /*for save message...........................*/
 .wrap {
     position: absolute;
@@ -309,3 +323,8 @@
 }
 
 .modal-body {padding: 2px 16px;}
+/*.........................................*/
+#cheques-div{
+    height: 200px;       /* Just for the demo          */
+    overflow-y: scroll;    /* Trigger vertical scroll    */
+}
